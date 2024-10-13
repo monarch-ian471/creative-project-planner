@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
-import Dashboard from '../views/Dashboard.vue';  // Example of a protected route
+// import Home from '../views/Home.vue';
+// import Dashboard from '../views/Dashboard.vue';  // Example of a protected route
 import { isAuthenticated } from '@/auth/auth0';  // Import the Auth0 authentication check
 
 // Ensure isAuthenticated is a function that returns a boolean

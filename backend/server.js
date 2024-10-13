@@ -13,8 +13,8 @@ app.use(cors());  // Add this line to enable CORS for all routes
 
 // Auth0 configuration
 const authConfig = {
-  domain: 'dev-lsauz5y1t0iz3nv2.us.auth0.com',
-  audience: 'https://creative-project-planner-api.com',
+  domain: process.env.AUTH0_DOMAIN || 'dev-lsauz5y1t0iz3nv2.us.auth0.com',
+  audience: process.env.AUTH0_AUDIENCE || 'https://creative-project-planner-api.com',
 
   //apiIdentifier: 'https://creative-project-planner-api.com'
 };
@@ -32,7 +32,7 @@ const checkJwt = jwt({
   algorithms: ['RS256']
 });
 
-const mongoURI = process.env.MONGO_URI;
+const mongoURI = 'mongodb+srv://iankatengeza:Kerrina%402002@creative-project-planne.besma.mongodb.net/creative-project-planner?retryWrites=true&w=majority';
 
 mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB connected...'))
