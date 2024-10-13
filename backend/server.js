@@ -1,14 +1,40 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Project = require('./models/Project'); // Import the Project model
+const cors = require('cors');
+const { expressjwt: jwt } = require('express-jwt');
+const jwksRsa = require('jwks-rsa');
 
 const app = express();  // Initialize Express app
 
 app.use(express.json());
 
-const mongoURI = 'mongodb+srv://iankatengeza:Kerrina%402002@creative-project-planne.besma.mongodb.net/creative-project-planner?retryWrites=true&w=majority';
+app.use(cors());  // Add this line to enable CORS for all routes
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+// Auth0 configuration
+const authConfig = {
+  domain: 'dev-lsauz5y1t0iz3nv2.us.auth0.com',
+  audience: 'https://creative-project-planner-api.com',
+
+  //apiIdentifier: 'https://creative-project-planner-api.com'
+};
+
+// Middleware to check JWTs
+const checkJwt = jwt({
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://${authConfig.domain}/.well-known/jwks.json`
+  }),
+  audience: authConfig.audience,
+  issuer: `https://${authConfig.domain}/`,
+  algorithms: ['RS256']
+});
+
+const mongoURI = process.env.MONGO_URI;
+
+mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB connected...'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -17,8 +43,9 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
 // ---------------------------------------------
 
 // 1. Route: Home route for testing
-app.get('/', (req, res) => {
-  res.send('Creative Project Planner API');
+// Protect routes with JWT middleware
+app.get('/api/protected', checkJwt, (req, res) => {
+  res.send('This is a protected route, only accessible with a valid token');
 });
 
 // 2. Route: Create a new project
