@@ -11,12 +11,12 @@
   |-- /auth0            // Handling authentication with Auth0
 
   |-- /components       // Reusable UI components
-   	|-- DashboardHeader.vue  // Top navigation bar for Dashboard
-   	|-- ProjectCard.vue      // Display a summary of a project
-   	|-- TaskList.vue         // List of tasks for each project
-   	|-- Calendar.vue         // Calendar widget for deadlines
+   	|-- Calendar-card.vue         // Calendar widget for deadlines
+	|-- DashboardHeader.vue  // Top navigation bar for Dashboard
+	|-- Progress-Tracker.vue  // Gantt chart or progress bars
+	|-- Project-Card.vue      // Display a summary of a project
    	|-- Sidebar.vue          // Sidebar for navigation in Dashboard
-   	|-- ProgressTracker.vue  // Gantt chart or progress bars
+	|-- Task-List.vue         // List of tasks for each project
 
   |-- /composables      // Vue 3 Composition API utilities
    	|-- useAuth.js           // Reusable authentication logic
@@ -24,8 +24,8 @@
    	|-- useTasks.js          // Fetch and manipulate task data
 
   |-- /layouts          // Page layouts
+    |-- AuthLayout.vue       // Layout for login and registration
    	|-- MainLayout.vue       // Layout for dashboard and authenticated routes
-   	|-- AuthLayout.vue       // Layout for login and registration
 
   |-- /router           // Vue Router configurations
 
