@@ -39,7 +39,7 @@ mongoose.connect(mongoURI)
   .catch(err => console.error('MongoDB connection error:', err));
 
 // ---------------------------------------------
-// ROUTES
+//  CRUD Operations and Routing
 // ---------------------------------------------
 
 // 1. Route: Home route for testing

@@ -1,0 +1,83 @@
+/public
+  |-- index.html        // Main entry HTML file
+  |-- favicon.ico       // Favicon for the app
+  |-- assets/           // Folder for public assets like images, logos, fonts
+  
+/src
+  |-- /assets           // Static assets that are bundled by Webpack
+      |-- images/       // App-specific images
+      |-- icons/        // Custom icons for UI elements
+
+  |-- /auth0            // Handling authentication with Auth0
+
+  |-- /components       // Reusable UI components
+   	|-- DashboardHeader.vue  // Top navigation bar for Dashboard
+   	|-- ProjectCard.vue      // Display a summary of a project
+   	|-- TaskList.vue         // List of tasks for each project
+   	|-- Calendar.vue         // Calendar widget for deadlines
+   	|-- Sidebar.vue          // Sidebar for navigation in Dashboard
+   	|-- ProgressTracker.vue  // Gantt chart or progress bars
+
+  |-- /composables      // Vue 3 Composition API utilities
+   	|-- useAuth.js           // Reusable authentication logic
+   	|-- useProjects.js       // Fetch and manipulate project data
+   	|-- useTasks.js          // Fetch and manipulate task data
+
+  |-- /layouts          // Page layouts
+   	|-- MainLayout.vue       // Layout for dashboard and authenticated routes
+   	|-- AuthLayout.vue       // Layout for login and registration
+
+  |-- /router           // Vue Router configurations
+
+  |-- /services         // API calls & backend interactions
+
+  |-- /store            // Vuex store for state management
+   	|-- auth.js              // Auth module
+   	|-- projects.js          // Manage projects state
+   	|-- tasks.js             // Manage tasks state
+   	|-- user.js              // User preferences and data
+
+  |-- /styles           // Global styles (Tailwind CSS, custom classes, etc.)
+   	|-- base.css             // Base Tailwind styles or custom styles
+   	|-- components.css       // Component-level custom styles
+   	|-- tailwind.css         // Import TailwindCSS utilities here
+
+  |-- /utils            // Utility functions/helpers
+   	|-- formatDate.js        // Helper function for date formatting
+   	|-- debounce.js          // Utility function for debouncing
+   	|-- storage.js           // LocalStorage or SessionStorage utilities
+
+  |-- /views            // Pages/views of the app
+   	|-- Dashboard.vue        // Main dashboard after user login
+   	|-- Projects.vue         // List of all user’s projects
+   	|-- ProjectDetail.vue    // Single project view, includes tasks, calendar, etc.
+   	|-- TaskDetail.vue       // Detailed view for a specific task
+   	|-- Profile.vue          // User profile page
+   	|-- Settings.vue         // App settings page
+
+  |-- App.vue           // Root Vue component
+  |-- main.js           // App entry point
+  |-- tailwind.config.js// TailwindCSS configuration
+	module.exports = {
+  		purge: ['./src/**/*.{vue,js,ts,jsx,tsx}', './public/index.html'],
+  		darkMode: false, // or 'media' or 'class'
+  		theme: {
+    			extend: {
+      				colors: {
+        			primary: '#4a90e2', // Customize your primary brand colors
+        			secondary: '#50e3c2',
+        			accent: '#f5a623',
+      		},
+      		spacing: {
+        		128: '32rem',
+        		144: '36rem',
+      		},
+    	    },
+  	},
+  	variants: {
+    		extend: {},
+  	},
+  	plugins: [],
+	}
+
+  |-- vue.config.js     // Vue CLI configuration file
