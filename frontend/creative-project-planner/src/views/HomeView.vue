@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import Dashboard from '@/components/Dashboard.vue';
+import Dashboard from '@/components/Dashboard-Header.vue';
 
 export default {
     name: 'HomeView',

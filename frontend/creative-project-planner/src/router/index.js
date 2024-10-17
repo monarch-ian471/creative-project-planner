@@ -1,8 +1,14 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-// import Home from '../views/Home.vue';
-// import Dashboard from '../views/Dashboard.vue';  // Example of a protected route
+import HomeView from '@/views/HomeView.vue';
+import MyDashboard from '@/views/MyDashboard.vue';
+import Community from '@/views/Community.vue';  // Example of another route
+import Settings from '@/views/Settings.vue';  // Example of another route
+import Projects from '@/views/Projects.vue';
+import CalendarCard from '@/components/Calendar-card.vue';
+import DashboardHeader from '@/components/Dashboard-Header.vue';
 import { isAuthenticated } from '@/auth/auth0';  // Import the Auth0 authentication check
+
 
 // Ensure isAuthenticated is a function that returns a boolean
 if (typeof isAuthenticated !== 'function') {
@@ -14,15 +20,40 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'HomeView',
+    component: HomeView,
   },
   {
     path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard,
+    name: 'MyDashboard',
+    component: MyDashboard,
     meta: { requiresAuth: true }  // Mark this route as protected
-  }
+  },
+  {
+    path: '/community',
+    name: 'Community',
+    component: Community,
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings,
+  },
+  {
+    path: '/projects',
+    name: 'Projects',
+    component: Projects,
+  },
+  {
+    path: '/Calendard-card',
+    name: 'CalendarCard',
+    component: CalendarCard,
+  },
+  {
+    path: '/dashboard-header',
+    name: 'DashboardHeader',
+    component: DashboardHeader,
+  },
 ];
 
 const router = new VueRouter({

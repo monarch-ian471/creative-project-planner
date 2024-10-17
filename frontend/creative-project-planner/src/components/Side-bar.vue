@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import DashboardHeader from './Dashboard-header.vue';
+import DashboardHeader from '@components/Dashboard-Header.vue';
 
 export default {
     name: 'SideBar',

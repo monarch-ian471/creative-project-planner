@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import CalendarCard from './calendar-card.vue';
+import CalendarCard from '@components/Calendar-card.vue';
 
 export default {
     components: {
