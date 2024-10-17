@@ -9,8 +9,8 @@
                 <div class="flex items-center space-x-4">
                     <img class="w-16 h-16 rounded-full" src="https://via.placeholder.com/150" alt="User Avatar">
                     <div>
-                        <p class="text-lg font-medium">John Doe</p>
-                        <p class="text-gray-600">john.doe@example.com</p>
+                        <p class="text-lg font-medium">Johnny Miboy</p>
+                        <p class="text-gray-600">johnny.Miboy@example.com</p>
                     </div>
                 </div>
             </div>

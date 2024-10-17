@@ -8,7 +8,7 @@
             </div>
             <div class="bg-white p-4 rounded shadow">
                 <h2 class="text-2xl font-semibold mb-2">Calendar</h2>
-                <Calendar />
+                <CalendarCard />
             </div>
         </div>
     </div>
@@ -16,13 +16,13 @@
 
 <script>
 import TaskList from '@/components/TaskList.vue';
-import Calendar from '@/components/Calendar.vue';
+import CalendarCard from '@/components/CalendarCard.vue';
 
 export default {
     name: 'ProjectDetail',
     components: {
         TaskList,
-        Calendar
+        CalendarCard,
     }
 };
 </script>

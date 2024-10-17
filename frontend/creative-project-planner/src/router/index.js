@@ -45,7 +45,7 @@ const routes = [
     component: Projects,
   },
   {
-    path: '/Calendard-card',
+    path: '/calendard-card',
     name: 'CalendarCard',
     component: CalendarCard,
   },
