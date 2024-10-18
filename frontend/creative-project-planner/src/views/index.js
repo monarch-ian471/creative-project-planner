@@ -9,13 +9,13 @@ const routes = [
     name: 'MyDashboard',
     component: MyDashboard,
     meta: { requiresAuth: true }  
-    }, 
-    {
+  }, 
+  {
     path: '/settings',
     name: 'Settings',
     component: Settngs,
   },
-    {
+  {
     path: '/projects',
     name: 'Projects',
     component: Projects,
