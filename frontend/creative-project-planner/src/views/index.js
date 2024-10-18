@@ -20,6 +20,17 @@ const routes = [
     name: 'Projects',
     component: Projects,
   },
+  {
+    path: '/community',
+    name: 'Community',
+    component: Community,
+  },
+  {
+    path: '/projectsdetails',
+    name: 'ProjectsDetails',
+    component: ProjectsDetails,
+  },
+  
 ]
 
 export default routes,
