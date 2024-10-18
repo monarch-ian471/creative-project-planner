@@ -1,6 +1,6 @@
 const routes = [
   {
-    path: '/',
+    path: '/homeview',
     name: 'HomeView',
     component: HomeView,
   },
@@ -8,9 +8,18 @@ const routes = [
     path: '/dashboard',
     name: 'MyDashboard',
     component: MyDashboard,
-    meta: { requiresAuth: true }  // Mark this route as protected
+    meta: { requiresAuth: true }  
+    }, 
+    {
+    path: '/settings',
+    name: 'Settings',
+    component: Settngs,
   },
-
+    {
+    path: '/projects',
+    name: 'Projects',
+    component: Projects,
+  },
 ]
 
 export default routes,
