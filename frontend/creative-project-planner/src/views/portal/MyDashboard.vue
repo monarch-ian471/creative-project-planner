@@ -7,12 +7,35 @@ export default {
                 { id: 2, name: 'Project B', status: 'Completed' },
                 { id: 3, name: 'Project C', status: 'Pending' },
             ],
+            routes: [
+                { path: '/portal/homeview', label: 'Home' },
+                { path: '/portal/community', label: 'Community' },
+                { path: '/portal/mydashboard', label: 'MyDashboard' },
+                { path: '/portal/projects', label: 'Projects' },
+            ],
         };
     },
 };
 </script>
 
 <template>
+    <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4">
+
+        <div class="flex flex-col items-center lg:flex-row lg:items-start">
+            <nav class="mt-8 text-center lg:text-left lg:mt-4 lg:ml-4 rounded-lg shadow-md">
+                <router-link
+                v-for="route in routes"
+                :key="route.path"
+                :to="route.path"
+                class="inline-block px-4 py-2 border-l border-gray-300 first:border-0 hover:bg-orange-400"
+                :aria-label="route.label"
+                >
+                {{ route.label }}
+                </router-link>
+            </nav>
+        </div>
+    </header>
+
     <div class="container mx-auto p-4">
         <div class="bg-white shadow-md rounded-lg p-6">
             <h1 class="text-2xl font-bold mb-4">My Dashboard</h1>
@@ -45,8 +68,8 @@ export default {
                             <td class="py-2 px-4 border-b">{{ project.name }}</td>
                             <td class="py-2 px-4 border-b">{{ project.status }}</td>
                             <td class="py-2 px-4 border-b">
-                                <button class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
-                                <button class="bg-red-500 text-white px-4 py-2 rounded ml-2">Delete</button>
+                                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-300">Edit</button>
+                                <button class="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-300">Delete</button>
                             </td>
                         </tr>
                     </tbody>
@@ -55,8 +78,8 @@ export default {
             
             <!-- Navigation Section -->
             <div class="flex space-x-4">
-                <button class="bg-green-500 text-white px-4 py-2 rounded">Add New Project</button>
-                <button class="bg-gray-500 text-white px-4 py-2 rounded">Settings</button>
+                <button class="bg-custom-peach text-white px-4 py-2 rounded hover:bg-orange-400">Add New Project</button>
+                <button class="bg-black text-white px-4 py-2 rounded hover:bg-gray-400">Settings</button>
             </div>
         </div>
     </div>

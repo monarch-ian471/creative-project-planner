@@ -15,9 +15,9 @@ export default defineComponent({
     <header class="bg-opacity-75 p-6 flex items-center">
       <img src="@/assets/cpp-logo.png" alt="Logo" class="h-10 mr-4">
       <h1 class="text-3xl font-bold">
-        <span class="text-custom-teal">Creative </span> 
-        <span class="text-custom-lime">Project </span> 
-        <span class="text-custom-peach">Planner</span>
+        <span class="text-custom-teal ">Creative </span> 
+        <span class="text-custom-peach">Project </span> 
+        <span class="text-custom-lime">Planner</span>
       </h1>
     </header>
 
