@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 // Routes 
 // import PublicRoutes from '@/views/public'
-import { routers as AdminRoutes } from '@/views/admin'
+import { routes as AdminRoutes } from '@/views/admin'
 import { routes as AuthRoutes } from '@/views/auth'
 import { routes as PortalRoutes } from '@/views/portal'
 
@@ -15,24 +15,16 @@ const router = createRouter({
     },
     {
       path: '/auth',
-      children: AuthRoutes,
-      meta: { requiresAuth: true }
+      children: AuthRoutes,  // Ensure AuthRoutes are properly prefixed
     },
     {
       path: '/admin',
-      children: AdminRoutes,
-      meta: { requiresAuth: true }
+      children: AdminRoutes,  // Ensure AdminRoutes are properly prefixed
     },
     {
       path: '/portal',
-      children: PortalRoutes,
-      meta: { requiresAuth: false }
+      children: PortalRoutes,  // Ensure PortalRoutes are properly prefixed
     },
-    // {
-    //   path: '/public',
-    //   children: PublicRoutes,
-    //   meta: { requiresAuth: false }
-    // },
   ]
 })
 

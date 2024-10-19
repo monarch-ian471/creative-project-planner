@@ -1,3 +1,15 @@
+<script>
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  name: 'App',
+  setup() {
+    // Since no complex logic is needed here, setup remains simple
+    return {};
+  }
+});
+</script>
+
 <template>
   <div id="app" class="min-h-screen flex flex-col">
     <header class="bg-green-500 text-white p-6 text-center">
@@ -13,15 +25,3 @@
     </footer>
   </div>
 </template>
-
-<script>
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'App',
-  setup() {
-    // Since no complex logic is needed here, setup remains simple
-    return {};
-  }
-});
-</script>

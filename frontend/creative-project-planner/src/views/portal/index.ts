@@ -1,35 +1,41 @@
 const routes = [
   {
-    path: '/homeview',
+    path: '/',
+    name: 'portal',
+    redirect: '/portal/homeview', // redirect to the correct path
+  },
+  {
+    path: '/portal/homeview',
     name: 'HomeView',
     component: () => import('@/views/portal/HomeView.vue')
   },
   {
-    path: '/mydashboard',
+    path: '/portal/mydashboard',
     name: 'MyDashboard',
     component: () => import('@/views/portal/MyDashboard.vue')
   }, 
   {
-    path: '/settings',
+    path: '/portal/settings',
     name: 'Settings',
     component: () => import('@/views/portal/Settings.vue')
   },
   {
-    path: '/projects',
+    path: '/portal/projects',
     name: 'Projects',
     component: () => import('@/views/portal/Projects.vue')
   },
   {
-    path: '/community',
+    path: '/portal/community',
     name: 'Community',
     component: () => import('@/views/portal/Community.vue')
   },
   {
-    path: '/projectdetails',
+    path: '/portal/projectdetails',
     name: 'ProjectDetails',
     component: () => import('@/views/portal/ProjectDetail.vue')
   },
-  
 ]
 
 export {routes}
+
+
