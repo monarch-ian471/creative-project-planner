@@ -11,7 +11,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/auth/login',
+      redirect: '/portal/homeview',
     },
     {
       path: '/auth',

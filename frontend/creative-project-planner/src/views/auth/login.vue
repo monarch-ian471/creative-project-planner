@@ -1,127 +1,58 @@
-<script>
-// import { Form as VForm, Field as VField, ErrorMessage } from 'vee-validate';
-// import * as yup from 'yup';
-// import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 
-// const values = ref({
-//   email: '',
-//   password: ''
-// });
+export default defineComponent({
+  name: 'LoginView',
+  setup() {
+    const email = ref('');
+    const password = ref('');
 
-// const loginSchema = yup.object({
-//   email: yup.string().email('Invalid email address').required('Email is required'),
-//   password: yup
-//     .string()
-//     .required('Password is required')
-//     .min(8, 'Password must be at least 8 characters')
-//     .matches(
-//       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*()\-_=+{};:,<.>?]{8,}$/,
-//       'Password must contain at least one uppercase letter, one lowercase letter, and one number'
-//     )
-//     .notOneOf(
-//       ['12345678', 'password', 'qwerty', 'azerty', '12345678'.toUpperCase()],
-//       'Password must not be too common'
-//     )
-// });
+    const handleLogin = () => {
+      console.log('Email:', email.value);
+      console.log('Password:', password.value);
+      // Handle login logic here, e.g., calling an API service
+    };
 
-// type LoginValues = {
-//   email: string;
-//   password: string;
-// };
-
-// const onSubmit = async (submittedValues: LoginValues): Promise<void> => {
-//   try {
-//     const response = await login(submittedValues.email, submittedValues.password);
-//     console.log('Login successful!', response);
-//     // Handle successful login, e.g., redirect to dashboard
-//   } catch (error) {
-//     console.error('Login failed', error);
-//     // Handle login failure, e.g., show error message
-//   }
-// };
+    return {
+      email,
+      password,
+      handleLogin
+    };
+  }
+});
 </script>
 
 <template>
-  <div class="flex min-h-full flex-1">
-    <div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-      <div class="mx-auto w-full max-w-sm lg:w-96">
-        <div>
-          <img class="h-14 w-auto" src="@/assets/cpp-logo.png" alt="Your Company" />
-          <h2 class="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign in to your account
-          </h2>
-          <p class="mt-2 text-sm leading-6 text-gray-500">
-            Do not have an account?
-            <router-link to="/auth/register" class="font-semibold text-indigo-600 hover:text-indigo-500">
-              Create Account
-            </router-link>
-          </p>
-        </div>
-
-        <div class="mt-10">
-          <VForm v-slot="{ errors, submitForm }" :validation-schema="loginSchema" @submit="submitForm(onSubmit)">
-            <div class="mb-4">
-              <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
-              <div class="mt-1">
-                <VField
-                  id="email"
-                  name="email"
-                  v-model="values.email"
-                  type="email"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  :class="{ 'border-red-500': errors.email }"
-                />
-                <ErrorMessage name="email" class="text-red-600 text-sm bg-red-100 px-3 py-2 rounded mt-2" />
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-              <div class="mt-1">
-                <VField
-                  id="password"
-                  name="password"
-                  v-model="values.password"
-                  type="password"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  :class="{ 'border-red-500': errors.password }"
-                />
-                <ErrorMessage name="password" class="text-red-600 text-sm bg-red-100 px-3 py-2 rounded mt-2" />
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
-              </div>
-
-              <div class="text-sm">
-                <router-link to="/auth/forgot-password/email" class="font-medium text-indigo-600 hover:text-indigo-500">
-                  Forgot password?
-                </router-link>
-              </div>
-            </div>
-
-            <div class="mt-6">
-              <button
-                type="submit"
-                class="w-full px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Sign in
-              </button>
-            </div>
-          </VForm>
-        </div>
+  <div class="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-6">Login</h1>
+    <form @submit.prevent="handleLogin">
+      <div class="mb-4">
+        <label for="email" class="block text-gray-700 mb-2">Email:</label>
+        <input 
+          type="email" 
+          v-model="email" 
+          required 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+          id="email"
+        />
       </div>
-    </div>
-    <div class="hidden lg:block relative w-0 flex-1">
-      <img class="absolute inset-0 h-full w-full object-cover" src="@/assets/bg-image.jpg" alt="Background Image" />
-    </div>
+      <div class="mb-6">
+        <label for="password" class="block text-gray-700 mb-2">Password:</label>
+        <input 
+          type="password" 
+          v-model="password" 
+          required 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+          id="password"
+        />
+      </div>
+      <button 
+        type="submit" 
+        class="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700"
+      >
+        Login
+      </button>
+    </form>
   </div>
 </template>
+

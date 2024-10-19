@@ -1,21 +1,59 @@
 <script lang="ts">
-export default {
-  data() {
+import { defineComponent } from 'vue';
+import { ref } from 'vue';
+
+export default defineComponent({
+  name: 'App',
+  setup() {
+    const isOpen = ref(false);
+    const routes = [
+      { path: '/portal/homeview', label: 'Home' },
+      { path: '/portal/community', label: 'Community' },
+      { path: '/portal/mydashboard', label: 'MyDashboard' },
+      { path: '/portal/projects', label: 'Projects' },
+      { path: '/portal/settings', label: 'Settings' },
+    ];
+
+    function toggleDropdown() {
+      isOpen.value = !isOpen.value;
+    }
+
     return {
-      routes: [
-        { path: '/portal/homeview', label: 'Home' },
-        { path: '/portal/community', label: 'Community' },
-        { path: '/portal/mydashboard', label: 'MyDashboard' },
-        { path: '/portal/projects', label: 'Projects' },
-      ],
+      isOpen,
+      toggleDropdown,
+      routes
     };
-  },
-};
+  }
+});
 </script>
 
 <template>
     <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4">
+        <div class="fixed top-0 right-0 px-4 py-2">
+            <router-link to="/login" class="bg-custom-peach text-white px-4 py-2 text-white hover:underline rounded-lg shadow-md hover:bg-orange-500">Login</router-link>
+              <div class="relative inline-block text-left">
+                <button @click="toggleDropdown" class="bg-black text-white px-4 py-1 text-white hover:underline rounded-lg shadow-md hover:bg-gray-400 focus:outline-none">
+                  Menu
+                </button>
+                </div>  
 
+                <div
+                  v-if="isOpen"
+                  class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                >
+                    <ul class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                    <li>
+                      <router-link to="/portal/settings" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Settings</router-link>
+                    </li>
+                    <li>
+                      <router-link to="/portal/mydashboard" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Dashboard</router-link>
+                    </li>
+                    <li>
+                      <router-link to="/logout" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Logout</router-link>
+                    </li>
+                    </ul>
+            </div>
+        </div>
         <div class="flex flex-col items-center lg:flex-row lg:items-start">
         <nav class="mt-8 text-center lg:text-left lg:mt-4 lg:ml-4 rounded-lg shadow-md">
             <router-link
@@ -49,11 +87,12 @@ export default {
         </div>
     </div>
 
-    <div class="text-white bg-black bg-opacity-75 rounded-lg shadow-md">
+    <div class="container mx-auto mt-2"> 
+      <div class="text-white bg-black bg-opacity-75 rounded-lg shadow-md">
         <h2 class="text-3xl font-bold text-center mt-8">TURN IDEAS INTO ACTION</h2>
         <p class="text-center mt-2">plan, create, & thrive with effortless project management</p>
-    </div>
-    
+      </div>
+  </div>
     <div>
         <h2 class="text-3xl font-bold text-center mt-8">Get Started Today!</h2>
         <p class="text-center mt-2">Sign up now to start planning your creative projects.</p>
