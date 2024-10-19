@@ -1,6 +1,6 @@
 import axios from 'axios';
 // eslint-disable-next-line no-unused-vars
-import { getAuth0Client } from '@/auth/auth0';  // 
+import { getAuth0Client } from '@/views/auth/auth0';  // 
 
 const API_URL = 'http://localhost:3000/api/projects';  // Backend API URL
 
