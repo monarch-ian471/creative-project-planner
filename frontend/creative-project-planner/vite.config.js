@@ -1,13 +1,20 @@
-// vite.config.js
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import path from 'path';  // Required to resolve paths
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')  // Ensure this resolves to 'src' folder
-    }
-  }
-});
+      '@': resolve(new URL('/', import.meta.url).pathname, 'src'), // Check this alias setup
+    },
+  },
+  css: {
+    // Configure PostCSS
+        tailwindcss, // Include Tailwind CSS
+        autoprefixer, // Include Autoprefixer
+    },
+  },
+)

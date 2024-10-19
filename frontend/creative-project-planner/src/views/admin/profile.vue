@@ -1,22 +1,32 @@
-<script setup>
+<script lang="ts">
 import { ref } from 'vue';
 
-const user = ref({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    role: 'Admin',
-    avatar: 'https://via.placeholder.com/150'
-});
+export default {
+    setup() {
+        const user = ref({
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            role: 'Admin',
+            avatar: 'https://via.placeholder.com/150'
+        });
 
-function editProfile() {
-    // Logic to edit profile
-    console.log('Edit Profile clicked');
-}
+        function editProfile() {
+            // Logic to edit profile
+            console.log('Edit Profile clicked');
+        }
 
-function logout() {
-    // Logic to logout
-    console.log('Logout clicked');
-}
+        function logout() {
+            // Logic to logout
+            console.log('Logout clicked');
+        }
+
+        return {
+            user,
+            editProfile,
+            logout
+        };
+    }
+};
 </script>
 
 <template>

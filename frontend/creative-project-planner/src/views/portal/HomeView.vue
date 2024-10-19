@@ -3,10 +3,10 @@ export default {
   data() {
     return {
       routes: [
-        { path: '/HomeView', label: 'Home' },
-        { path: '/Community', label: 'Community' },
-        { path: '/MyDashboard', label: 'MyDashboard' },
-        { path: '/Projects', label: 'Projects' },
+        { path: '/portal/homeview', label: 'Home' },
+        { path: '/portal/community', label: 'Community' },
+        { path: '/portal/mydashboard', label: 'MyDashboard' },
+        { path: '/portal/projects', label: 'Projects' },
       ],
     };
   },
@@ -14,8 +14,7 @@ export default {
 </script>
 
 <template>
-    <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-8">
-        <img alt="cpp logo" class="w-32 h-32 mb-8 lg:mb-0 lg:mr-8" src="@/assets/cpp-logo.svg" />
+    <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4">
 
         <div class="flex flex-col items-center lg:flex-row lg:items-start">
         <nav class="mt-8 text-center lg:text-left lg:mt-4 lg:ml-4">
