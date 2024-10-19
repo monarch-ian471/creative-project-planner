@@ -9,6 +9,11 @@ export default {
       backgroundImage: {
         'app-bg': "url('@/assets/bg.png')", // Custom background image
       },
+      colors: {
+        'custom-teal': '#00BFA5',  // Tiffany Blue
+        'custom-lime': '#A5D647',  // Lime Green
+        'custom-peach': '#FFCCBC', // Peach Puff
+      },
     },
   },
   plugins: [],
