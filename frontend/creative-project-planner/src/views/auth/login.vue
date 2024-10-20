@@ -62,10 +62,10 @@ export default defineComponent({
 
     <!-- Login Form -->
     <div v-else>
-      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Login</h1>
+      <h1 class="text-3xl font-bold text-center mb-8 text-orange-800">Login</h1>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <label for="email" class="block text-sm font-medium text-orange-700">Email</label>
           <input
             type="email"
             id="email"
@@ -76,7 +76,7 @@ export default defineComponent({
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <label for="password" class="block text-sm font-medium text-orange-700">Password</label>
           <input
             type="password"
             id="password"
@@ -100,7 +100,7 @@ export default defineComponent({
       </div>
 
       <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">Don't have an account? <a href="/userRegister" class="text-custom-peach hover:text-orange-500">Sign up</a></p>
+        <p class="text-sm text-orange-600">Don't have an account? <a href="/userRegister" class="text-custom-peach hover:text-orange-500">Sign up</a></p>
     </div>
     </div>
   </div>
