@@ -1,7 +1,13 @@
 <script lang="ts">
-export default {
-    data() {
+import { defineComponent } from 'vue';
+import { useAuth } from '@/composables/useAuth';
+
+export default defineComponent({
+    name: 'MyDashboard',
+    setup() {
+        const { user } = useAuth(); // Fetch user data from useAuth
         return {
+            user,
             projects: [
                 { id: 1, name: 'Project A', status: 'In Progress' },
                 { id: 2, name: 'Project B', status: 'Completed' },
@@ -10,27 +16,26 @@ export default {
             routes: [
                 { path: '/portal/homeview', label: 'Home' },
                 { path: '/portal/community', label: 'Community' },
-                { path: '/portal/mydashboard', label: 'MyDashboard' },
+                { path: '/portal/mydashboard', label: 'My Dashboard' },
                 { path: '/portal/projects', label: 'Projects' },
             ],
         };
     },
-};
+});
 </script>
 
 <template>
     <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4">
-
         <div class="flex flex-col items-center lg:flex-row lg:items-start">
             <nav class="mt-8 text-center lg:text-left lg:mt-4 lg:ml-4 rounded-lg shadow-md">
                 <router-link
-                v-for="route in routes"
-                :key="route.path"
-                :to="route.path"
-                class="inline-block px-4 py-2 border-l border-gray-300 first:border-0 hover:bg-orange-400"
-                :aria-label="route.label"
+                    v-for="route in routes"
+                    :key="route.path"
+                    :to="route.path"
+                    class="inline-block px-4 py-2 border-l border-gray-300 first:border-0 hover:bg-orange-400"
+                    :aria-label="route.label"
                 >
-                {{ route.label }}
+                    {{ route.label }}
                 </router-link>
             </nav>
         </div>
@@ -38,7 +43,7 @@ export default {
 
     <div class="container mx-auto p-4">
         <div class="bg-white shadow-md rounded-lg p-6">
-            <h1 class="text-2xl font-bold mb-4">My Dashboard</h1>
+            <h1 class="text-2xl font-bold mb-4">Welcome, {{ user?.name }}!</h1>
             
             <!-- User Profile Section -->
             <div class="mb-6">
@@ -46,8 +51,8 @@ export default {
                 <div class="flex items-center space-x-4">
                     <img class="w-16 h-16 rounded-full" src="https://via.placeholder.com/150" alt="User Avatar">
                     <div>
-                        <p class="text-lg font-medium">Johnny Miboy</p>
-                        <p class="text-gray-600">johnny.Miboy@example.com</p>
+                        <p class="text-lg font-medium">{{ user?.name }}</p>
+                        <p class="text-gray-600">{{ user?.email }}</p>
                     </div>
                 </div>
             </div>
