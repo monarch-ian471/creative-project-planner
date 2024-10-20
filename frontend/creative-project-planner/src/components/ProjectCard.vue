@@ -1,4 +1,5 @@
 <script>
+
 export default {
     name: 'ProjectCard',
     props: {
@@ -7,12 +8,6 @@ export default {
             required: true
         }
     },
-    methods: {
-        changeStatus() {
-            // Logic to change the project status
-            this.$emit('change-status', this.project);
-        }
-    }
 }
 </script>
 
@@ -26,7 +21,7 @@ export default {
             <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
                 {{ project.status }}
             </span>
-            <button @click="changeStatus" class="bg-custom-peach hover:bg-orange-400 text-white font-bold py-2 px-4 rounded">
+            <button @click="changeStatus" class="bg-teal-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-300">Change Status
                 Change Status
             </button>
         </div>

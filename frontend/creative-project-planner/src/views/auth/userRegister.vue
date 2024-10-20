@@ -374,7 +374,7 @@ export default {
         </div>
 
         <div class="mt-6 flex items-center justify-end gap-x-6">
-          <button type="reset" class="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-custom-orange">Cancel</button>
+          <button type="reset" class="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-custom-orange"> <a href="/portal/homeview">Cancel</a></button>
           <button
             type="submit"
             class="rounded-md bg-custom-peach px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"

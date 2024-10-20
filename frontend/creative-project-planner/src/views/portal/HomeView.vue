@@ -12,7 +12,6 @@ export default defineComponent({
       { path: '/portal/community', label: 'Community' },
       { path: '/portal/mydashboard', label: 'MyDashboard' },
       { path: '/portal/projects', label: 'Projects' },
-      // { path: '/portal/settings', label: 'Settings' },
     ];
 
     function toggleDropdown() {
@@ -77,36 +76,63 @@ export default defineComponent({
         </div>
     </header>
 
+    <br>
     <div class="container mx-auto mt-8">
         <h1 class="text-4xl font-bold text-center mb-6">Creative Project Planner</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-md">
+            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-md hover:bg-gray-900">
                 <h2 class="text-2xl font-semibold mb-4">Organize Your Ideas</h2>
                 <p>Keep all your creative ideas in one place and easily accessible. Never lose track of your thoughts and inspirations.</p>
             </div>
-            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-md">
+            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-md hover:bg-gray-900">
                 <h2 class="text-2xl font-semibold mb-4">Plan Your Projects</h2>
                 <p>Break down your projects into manageable tasks and set deadlines to stay on track. Achieve your goals efficiently.</p>
             </div>
-            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-md">
+            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-md hover:bg-gray-900">
                 <h2 class="text-2xl font-semibold mb-4">Collaborate with Team</h2>
                 <p>Work together with your team seamlessly. Share ideas, assign tasks, and track progress in real-time.</p>
             </div>
         </div>
     </div>
 
-    <div class="container mx-auto mt-2"> 
-      <div class="text-black bg-custome-teal bg-opacity-75 rounded-lg shadow-md">
-        <h2 class="text-3xl font-bold text-center mt-8">TURN IDEAS INTO ACTION</h2>
-        <p class="text-center mt-2">plan, create, & thrive with effortless project management</p>
+    <br>
+    <div class="container mx-auto mt-2 flex justify-center">
+      <div class="text-black bg-custom-teal bg-opacity-75 rounded-lg shadow-md p-6 text-center hover:bg-green-300">
+      <h2 class="text-3xl font-bold mt-8">TURN IDEAS INTO ACTION</h2>
+      <hr class="my-4">
+      <p class="mt-2">plan, create, & thrive with effortless project management</p>
+      <br>
       </div>
-  </div>
+    </div>
+
     <div>
         <h2 class="text-3xl font-bold text-center mt-8">Get Started Today!</h2>
         <p class="text-center mt-2">Sign up now to start planning your creative projects.</p>
         <div class="flex justify-center mt-4">
             <router-link to="/userRegister" class="bg-custom-peach text-white px-6 py-3 rounded-lg shadow-md hover:bg-orange-500">Create Account</router-link>
         </div>
+    </div>
+
+    <br>
+    <div class="community-categories mb-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="category bg-black bg-opacity-40 border border-gray-300 p-5 rounded-lg text-center mb-5 flex flex-col md:flex-row">
+        <img src="@/assets/community-1.png" alt="Community Projects" class="w-full md:w-1/2 rounded-lg mb-4 md:mb-0 md:mr-4">
+        <div class="flex flex-col justify-center">
+          <h3 class="text-2xl text-white mb-3">Community Projects</h3>
+          <p class="text-lg text-white mb-3">Explore the latest community projects and get inspired to start your own creative endeavor.</p>
+          <p class="text-lg text-white mb-3">Share your favorite projects on social media to spread the word and connect with other creatives.</p>
+          <p class="text-lg text-white mb-3">Click on a project to view more details and get involved!</p>
+        </div>
+      </div>
+      <div class="category bg-black bg-opacity-40 border border-gray-300 p-5 rounded-lg text-center mb-5 flex flex-col md:flex-row">
+        <img src="@/assets/featured-1.png" alt="Featured Projects" class="w-full md:w-1/2 rounded-lg mb-4 md:mb-0 md:mr-4">
+        <div class="flex flex-col justify-center">
+          <h3 class="text-2xl text-white mb-3">Featured Projects</h3>
+          <p class="text-lg text-white mb-3">Discover featured projects that are making waves in the community.</p>
+          <p class="text-lg text-white mb-3">Get inspired by the creativity and innovation of your peers.</p>
+          <p class="text-lg text-white mb-3">Join the conversation and contribute your own ideas!</p>
+        </div>
+      </div>
     </div>
     
     <RouterView />

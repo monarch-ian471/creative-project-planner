@@ -56,7 +56,7 @@ export const getProjectById = async (id: string): Promise<Project> => {
 };
 
 // Create a new project
-export const createProject = async (projectData: ProjectData): Promise<Project> => {
+export const addProject = async (projectData: ProjectData): Promise<Project> => {
     try {
         const headers = await getAuthHeaders();
         const response: AxiosResponse<Project> = await axios.post(API_URL, projectData, headers);

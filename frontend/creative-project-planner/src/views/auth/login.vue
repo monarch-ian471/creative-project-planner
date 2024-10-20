@@ -53,42 +53,56 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <p v-if="isAuthenticated">Welcome, {{ user?.name }}!</p>
-    <!-- <button @click="login">Logout</button> -->
-  </div>
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 bg-opacity-40">
+  <div class="w-full max-w-md p-8 bg-white border border-orange-400 rounded-xl shadow-xl">
+    <!-- Authenticated state -->
+    <div v-if="isAuthenticated" class="text-center mb-6">
+      <p class="text-lg font-semibold text-gray-700">Welcome, {{ user?.name }}!</p>
+    </div>
 
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="max-w-lg mx-auto p-24 border border-gray-300 rounded-lg shadow-lg">
-    <h1 class="text-6xl text-center font-bold mb-6">Login</h1>
-    <form @submit.prevent="handleLogin">
-      <div class="mb-4">
-        <label for="email" class="block text-gray-700 mb-2">Email:</label>
-        <input 
-          type="email" 
-          v-model="email" 
-          required 
-          class="w-full px-3 py-2 border border-gray-300 rounded-md" 
-          id="email"
-        />
+    <!-- Login Form -->
+    <div v-else>
+      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Login</h1>
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            required
+            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-custom-peach focus:border-custom-peach sm:text-sm"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            required
+            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-custom-peach focus:border-custom-peach sm:text-sm"
+          />
+        </div>
+
+        <button
+          type="submit"
+          @click="handleLogin"
+          class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-custom-peach hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-peach"
+        >
+          Login
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <a href="#" class="text-sm text-custom-peach hover:text-orange-500">Forgot your password?</a>
       </div>
-      <div class="mb-6">
-        <label for="password" class="block text-gray-700 mb-4">Password:</label>
-        <input 
-          type="password" 
-          v-model="password" 
-          required 
-          class="w-full px-3 py-2 border border-gray-300 rounded-md" 
-          id="password"
-        />
-      </div>
-      <button 
-        type="submit" 
-        class="justify-center rounded-md bg-custom-peach px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-400"
-      >
-        Login
-      </button>
-    </form>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">Don't have an account? <a href="/userRegister" class="text-custom-peach hover:text-orange-500">Sign up</a></p>
+    </div>
+    </div>
   </div>
-  </div>
+</div>
 </template>
