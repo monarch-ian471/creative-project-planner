@@ -134,6 +134,31 @@ export default defineComponent({
         </div>
       </div>
     </div>
+
+    <div></div>
+    <div class="container mx-auto mt-8">
+      <h2 class="text-3xl font-bold text-center mb-6">Frequently Asked Questions</h2>
+      <div class="faq-item bg-white p-6 rounded-lg shadow-md mb-4">
+        <h3 class="text-2xl font-semibold mb-2">What is Creative Project Planner?</h3>
+        <p>Creative Project Planner is a tool designed to help you organize, plan, and collaborate on your creative projects. It provides features to keep track of your ideas, break down projects into tasks, and work seamlessly with your team.</p>
+      </div>
+      <div class="faq-item bg-white p-6 rounded-lg shadow-md mb-4">
+        <h3 class="text-2xl font-semibold mb-2">How do I get started?</h3>
+        <p>To get started, simply sign up for an account by clicking on the "Create Account" button on the home page. Once registered, you can start planning your projects and collaborating with your team.</p>
+      </div>
+      <div class="faq-item bg-white p-6 rounded-lg shadow-md mb-4">
+        <h3 class="text-2xl font-semibold mb-2">Can I collaborate with others?</h3>
+        <p>Yes, Creative Project Planner allows you to collaborate with your team members. You can share ideas, assign tasks, and track progress in real-time to ensure everyone is on the same page.</p>
+      </div>
+      <div class="faq-item bg-white p-6 rounded-lg shadow-md mb-4">
+        <h3 class="text-2xl font-semibold mb-2">Is there a mobile app available?</h3>
+        <p>Currently, Creative Project Planner is available as a web application. We are working on developing a mobile app to provide you with more flexibility and convenience.</p>
+      </div>
+      <div class="faq-item bg-white p-6 rounded-lg shadow-md mb-4">
+        <h3 class="text-2xl font-semibold mb-2">How can I contact support?</h3>
+        <p>If you need any assistance or have any questions, you can contact our support team through the "Contact Us" page. We are here to help you with any issues you may encounter.</p>
+      </div>
+    </div>
     
     <RouterView />
 </template>
