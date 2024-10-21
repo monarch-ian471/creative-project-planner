@@ -29,11 +29,6 @@ const routes = [
     name: 'Community',
     component: () => import('@/views/portal/Community.vue')
   },
-  {
-    path: '/portal/projectdetails',
-    name: 'ProjectDetails',
-    component: () => import('@/views/portal/ProjectDetail.vue')
-  },
 ]
 
 export {routes}
