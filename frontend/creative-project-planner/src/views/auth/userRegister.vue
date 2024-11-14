@@ -242,28 +242,28 @@ export default {
                     name="country"
                     autocomplete="country-name"
                     v-model="form.country"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:max-w-xs sm:text-sm sm:leading-6"
+                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   >
-                    <option>Malawi</option>
-                    <option>Zambia</option>
-                    <option>Tanzania</option>
+                    <option value="" disabled selected>Select your country</option>
+                    <option value="Malawi">Malawi</option>
+                    <option value="Kenya">Kenya</option>
+                    <option value="Zambia">Zambia</option>
+                    <option value="South Africa">South Africa</option>
+                    <option value="Tanzania">Tanzania</option>
                   </select>
                   <span v-if="errors.country" class="text-red-500 text-sm">{{ errors.country }}</span>
                 </div>
               </div>
 
-              <div class="col-span-full">
-                <label
-                  for="street-address"
-                  class="block text-sm font-medium leading-6 text-orange-900"
+              <div class="sm:col-span-3">
+                <label for="streetAddress" class="block text-sm font-medium leading-6 text-orange-900"
                   >Street address</label
                 >
                 <div class="mt-2">
                   <input
+                    id="streetAddress"
+                    name="streetAddress"
                     type="text"
-                    name="street-address"
-                    id="street-address"
-                    autocomplete="street-address"
                     v-model="form.streetAddress"
                     class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
@@ -271,16 +271,15 @@ export default {
                 </div>
               </div>
 
-              <div class="sm:col-span-2 sm:col-start-1">
+              <div class="sm:col-span-3">
                 <label for="city" class="block text-sm font-medium leading-6 text-orange-900"
                   >City</label
                 >
                 <div class="mt-2">
                   <input
-                    type="text"
-                    name="city"
                     id="city"
-                    autocomplete="address-level2"
+                    name="city"
+                    type="text"
                     v-model="form.city"
                     class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
@@ -288,16 +287,15 @@ export default {
                 </div>
               </div>
 
-              <div class="sm:col-span-2">
+              <div class="sm:col-span-3">
                 <label for="region" class="block text-sm font-medium leading-6 text-orange-900"
                   >State / Province</label
                 >
                 <div class="mt-2">
                   <input
-                    type="text"
-                    name="region"
                     id="region"
-                    autocomplete="address-level1"
+                    name="region"
+                    type="text"
                     v-model="form.region"
                     class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
@@ -305,84 +303,68 @@ export default {
                 </div>
               </div>
 
-              <div class="sm:col-span-2">
-                <label for="postal-code" class="block text-sm font-medium leading-6 text-orange-900"
+              <div class="sm:col-span-3">
+                <label for="postalCode" class="block text-sm font-medium leading-6 text-orange-900"
                   >ZIP / Postal code</label
                 >
                 <div class="mt-2">
                   <input
+                    id="postalCode"
+                    name="postalCode"
                     type="text"
-                    name="postal-code"
-                    id="postal-code"
-                    autocomplete="postal-code"
                     v-model="form.postalCode"
                     class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.postalCode" class="text-red-500 text-sm">{{ errors.postalCode }}</span>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div class="pb-12">
-            <h2 class="text-xl font-semibold leading-7 text-orange-900">Notifications</h2>
-            <p class="mt-1 text-sm leading-6 text-orange-600">
-              Chose basic communication preferences.
-            </p>
-
-            <div class="mt-8 space-y-10">
-              <fieldset>
-                <div class="space-y-6">
-                  <div class="relative flex gap-x-3">
-                    <div class="flex h-6 items-center">
-                      <input
-                        id="sms"
-                        name="sms"
-                        type="checkbox"
-                        v-model="form.notifications.sms"
-                        class="h-4 w-4 rounded border-orange-300 text-orange-400 focus:ring-custom-peach"
-                      />
-                    </div>
-                    <div class="text-sm leading-6">
-                      <label for="sms" class="font-medium text-orange-900">SMS</label>
-                      <p class="text-orange-500">
-                        Get notified by SMS
-                      </p>
-                    </div>
-                  </div>
-                  <div class="relative flex gap-x-3">
-                    <div class="flex h-6 items-center">
-                      <input
-                        id="email"
-                        name="email"
-                        type="checkbox"
-                        v-model="form.notifications.email"
-                        class="h-4 w-4 rounded border-orange-300 text-orange-400 focus:ring-custom-peach"
-                      />
-                    </div>
-                    <div class="text-sm leading-6">
-                      <label for="email" class="font-medium text-orange-900">Email</label>
-                      <p class="text-orange-500">Get notified by email.</p>
-                    </div>
-                  </div>
-                  
+              <div class="sm:col-span-3">
+                <div class="flex items-center">
+                  <input
+                    id="sms"
+                    name="sms"
+                    type="checkbox"
+                    v-model="form.notifications.sms"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label for="sms" class="ml-2 block text-sm font-medium leading-6 text-orange-900"
+                    >Receive SMS notifications</label
+                  >
                 </div>
-              </fieldset>
-           
+              </div>
+
+              <div class="sm:col-span-3">
+                <div class="flex items-center">
+                  <input
+                    id="emailNotifications"
+                    name="emailNotifications"
+                    type="checkbox"
+                    v-model="form.notifications.email"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label for="emailNotifications" class="ml-2 block text-sm font-medium leading-6 text-orange-900"
+                    >Receive Email notifications</label
+                  >
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="mt-6 flex items-center justify-end gap-x-6">
-          <button type="reset" class="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-custom-orange"> <a href="/portal/homeview">Cancel</a></button>
-          <button
-            type="submit"
-            class="rounded-md bg-custom-peach px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-          >
-            Register
-          </button>
+          <div class="mt-8 flex justify-center">
+            <button
+              type="submit"
+              class="inline-flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
+            >
+              Register
+            </button>
+          </div>
         </div>
       </form>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Add any additional styles for the form here */
+</style>
