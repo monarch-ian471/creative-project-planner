@@ -107,9 +107,9 @@ export default defineComponent({
           </button>
         </form>
 
-        <div class="mt-6 text-center">
+        <!-- <div class="mt-6 text-center">
           <a href="#" class="text-sm text-custom-peach hover:text-orange-500">Forgot your password?</a>
-        </div>
+        </div> -->
 
         <div class="mt-6 text-center">
           <p class="text-sm text-orange-600">Don't have an account? <a href="/userRegister" class="text-custom-peach hover:text-orange-500">Sign up</a></p>

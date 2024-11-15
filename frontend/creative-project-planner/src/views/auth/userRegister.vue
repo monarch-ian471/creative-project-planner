@@ -352,6 +352,7 @@ export default {
           </div>
 
           <div class="mt-8 flex justify-center">
+            <router-link to="/portal/homeview" class="inline-flex justify-center rounded-md border border-transparent bg-gray-600 px-6 py-3 text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm md-2" role="menuitem">Cancel</router-link>
             <button
               type="submit"
               class="inline-flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
