@@ -13,33 +13,26 @@ const TaskSchema = new mongoose.Schema({
 });
 
 // Define the Project schema
-const ProjectSchema = new mongoose.Schema({
+// Define project schema
+const projectSchema = new mongoose.Schema({
   title: {
-    type: String,
-    required: true, // Title is required
-    trim: true, // Trim whitespace
+      type: String,
+      required: true,
   },
   description: {
-    type: String,
-    required: true, // Description is required
-    trim: true, // Trim whitespace
+      type: String,
+      required: true,
   },
-  budget: {
-    type: Number,
-    required: true, // Budget is required
-    min: 0, // Ensure budget is non-negative
-  },
-  tasks: [TaskSchema], // Embed Task schema
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
-    required: true, // Link to a user who created the project
+  dueDate: {
+      type: Date,
+      required: true,
   },
   createdAt: {
-    type: Date,
-    default: Date.now, // Automatically set the creation date
+      type: Date,
+      default: Date.now,
   },
 });
 
 // Export the Project model
-module.exports = mongoose.model('Project', ProjectSchema);
+const Project = mongoose.model('Project', projectSchema);
+module.exports = Project;
