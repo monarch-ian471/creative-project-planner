@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { registerUser } from '@/services/userService'; // Import the user service
 
+
 // Define the structure of your form
 interface Form {
   firstName: string;
@@ -81,15 +82,15 @@ const validateForm = (): boolean => {
 const handleSubmit = async (event: Event): Promise<void> => {
   event.preventDefault();
 
-  if (!isAuthenticated.value) {
-    router.push('/login');
-    return;
-  }
+  // if (!isAuthenticated.value) {
+  //   router.push('/login');
+  //   return;
+  // }
 
   if (validateForm()) {
     try {
-      // Send form data to backend for registration
-      await registerUser({
+      const response = await registerUser({
+        // form fields
         firstName: form.value.firstName,
         lastName: form.value.lastName,
         email: form.value.email,
@@ -99,15 +100,18 @@ const handleSubmit = async (event: Event): Promise<void> => {
         city: form.value.city,
         region: form.value.region,
         postalCode: form.value.postalCode,
-        password: form.value.password, // Include password field
+        password: form.value.password,
         notifications: {
           sms: form.value.notifications.sms,
           email: form.value.notifications.email,
         },
       });
 
-      // Redirect on success
-      await router.push('/login');
+      if (response.status === 201) { // Check if the response status indicates success
+        await router.push('/login');
+      } else {
+        console.error('Unexpected response:', response);
+      }
     } catch (error) {
       console.error('Error registering user:', error);
     }
@@ -136,7 +140,7 @@ export default {
       </div>
       <form
         class="mx-auto mt-10 max-w-4xl bg-white border border-orange-400 shadow-md ring-1 ring-orange-200 sm:rounded-lg p-8"
-        @submit="handleSubmit"
+          @submit.prevent="handleSubmit"
       >
         <div class="space-y-12">
 
@@ -356,6 +360,7 @@ export default {
             <button
               type="submit"
               class="inline-flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
+              @submit.prevent="handleSubmit"
             >
               Register
             </button>
@@ -365,7 +370,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add any additional styles for the form here */
-</style>

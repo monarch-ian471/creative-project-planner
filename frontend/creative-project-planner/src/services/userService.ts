@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:3000/api/users'; // Your backend API for user 
 
 // Define the types for User and UserData
 interface User {
+  status: number;
   id: string;
   firstName: string;
   lastName: string;
@@ -51,13 +52,12 @@ const getAuthHeaders = async (): Promise<{ headers: { Authorization: string } }>
 };
 
 // Create a new user (registration)
-export const registerUser = async (userData: UserData): Promise<User> => {
+export const registerUser = async (userData: { firstName: string; lastName: string; email: string; phone: string; country: string; streetAddress: string; city: string; region: string; postalCode: string; password: string; notifications: { sms: boolean; email: boolean; }; }) => {
     try {
-        const headers = await getAuthHeaders();
-        const response: AxiosResponse<User> = await axios.post(`${API_URL}/register`, userData, headers);
-        return response.data;
+      const response = await axios.post('/api/users/register', userData);
+      return response;
     } catch (error) {
-        console.error('Error registering user:', error);
-        throw error;
+      console.error('Error during registration:', error);
+      throw error;
     }
-};
+  };

@@ -40,9 +40,52 @@ mongoose.connect(mongoURI)
 // Routes
 // ---------------------------------------------
 
-// User Routes (for registration)
-const userRoutes = require('./routes/users'); // Import user routes
-app.use('/api/users', userRoutes); // Mount user routes
+// User Registration Route
+app.post('/api/users/register', async (req, res) => {
+  const { firstName, lastName, email, phone, country, streetAddress, city, region, postalCode, password, notifications } = req.body;
+
+  try {
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      phone,
+      country,
+      streetAddress,
+      city,
+      region,
+      postalCode,
+      password: hashedPassword,
+      notifications,
+    });
+
+    // Save the user to the database
+    await newUser.save();
+
+    // Respond with user data (excluding password) for successful registration
+    res.status(201).json({
+      message: 'User registered successfully',
+      user: {
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+      }
+    });
+  } catch (err) {
+    console.error('Error registering user:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // POST /api/users/login - Authenticate a user
 app.post('/api/users/login', async (req, res) => {

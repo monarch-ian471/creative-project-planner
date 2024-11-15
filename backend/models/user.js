@@ -1,31 +1,29 @@
-// models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const Schema = mongoose.Schema;
 
-// Define the User schema
-const userSchema = new Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true, unique: true },
-    phone: { type: String },
-    country: { type: String },
-    streetAddress: { type: String },
-    city: { type: String },
-    region: { type: String },
-    postalCode: { type: String },
-    notifications: { type: Boolean, default: false }, // Whether the user opted for notifications
-    createdAt: { type: Date, default: Date.now }
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  country: { type: String, required: true },
+  streetAddress: { type: String, required: true },
+  city: { type: String, required: true },
+  region: { type: String, required: true },
+  postalCode: { type: String, required: true },
+  password: { type: String, required: true },
+  notifications: {
+    sms: { type: Boolean, default: false },
+    email: { type: Boolean, default: false },
+  }
 });
 
-// Hash [assword before saving
-userSchema.pre('save', async function(next){
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
 });
 
-// Create and export the User model
 const User = mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = { User };
