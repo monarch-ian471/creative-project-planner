@@ -18,7 +18,6 @@ interface Project {
 export default defineComponent({
   name: 'Projects',
   setup() {
-    const isOpen = ref(false);
     const newComments = ref<{ [key: number]: string }>({});
     const newMessage = ref('');
     const feedMessages = ref<{ user: string; text: string }[]>([]);
@@ -58,22 +57,6 @@ export default defineComponent({
       }
     ]);
 
-    const routes = [
-      { path: '/portal/homeview', label: 'Home' },
-      { path: '/portal/community', label: 'Community' },
-      { path: '/portal/mydashboard', label: 'MyDashboard' },
-      { path: '/portal/projects', label: 'Projects' },
-    ];
-
-    const router = useRouter();
-
-    function toggleDropdown() {
-      isOpen.value = !isOpen.value;
-    }
-
-    function logOut() {
-      router.push('/login');
-    }
 
     function shareOnSocial(platform: string, project: { title: string }) {
       const url = encodeURIComponent(window.location.href);
@@ -112,13 +95,8 @@ export default defineComponent({
     }
 
     return {
-      isOpen,
       projects,
-      routes,
       newComments,
-      toggleDropdown,
-      router,
-      logOut,
       shareOnSocial,
       addComment,
       likeProject,
@@ -132,43 +110,6 @@ export default defineComponent({
 
 
 <template>
-  <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4">
-    <div class="fixed top-0 right-0 px-4 py-2">
-      <router-link to="/login" class="bg-custom-peach text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-500 hover:underline">Login</router-link>
-      <div class="relative inline-block text-left">
-        <button @click="toggleDropdown" class="bg-black text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 hover:underline focus:outline-none transition-transform duration-200">
-          Menu
-        </button>
-          <div v-if="isOpen" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-            <ul class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              <li>
-                <router-link to="/portal/settings" class="text-gray-700 px-4 py-2 hover:bg-gray-100 rounded-lg transition duration-200" role="menuitem">Settings</router-link>
-              </li>
-              <li>
-                <router-link to="/portal/mydashboard" class="text-gray-700 px-4 py-2 hover:bg-gray-100 rounded-lg transition duration-200" role="menuitem">Dashboard</router-link>
-              </li>
-              <li>
-                <button @click="logOut" class="text-gray-700 px-4 py-2 hover:bg-gray-100 rounded-lg transition duration-200" role="menuitem">Logout</button>
-              </li>
-            </ul>
-          </div>
-      </div>
-    </div>
-    
-     <!-- Navigation Links -->
-     <nav class="mt-8 text-center lg:text-left lg:mt-4 lg:ml-4">
-      <router-link
-        v-for="route in routes"
-        :key="route.path"
-        :to="route.path"
-        class="inline-block px-4 py-2 border-l border-gray-300 first:border-0 hover:bg-orange-500"
-        :aria-label="route.label"
-      >
-        {{ route.label }}
-      </router-link>
-    </nav>
-  </header>
-
   <div class="community-page p-5">
     <h1 class="text-3xl font-bold mb-5 text-center">Community Projects</h1>
     <div class="community-intro mb-5 bg-black bg-opacity-40 border border-gray-300 p-5 rounded-lg text-center">

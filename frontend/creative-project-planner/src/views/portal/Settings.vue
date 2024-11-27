@@ -4,7 +4,6 @@ import { ref, defineComponent } from 'vue';
 export default defineComponent({
   name: 'UserSettings',
   setup() {
-    const isOpen = ref(false);
     const isLoading = ref(false);
     const hasError = ref(false);
     const successMessage = ref('');
@@ -15,17 +14,7 @@ export default defineComponent({
     const linkedInHandle = ref('linkedin.com/in/johndoe');
     const profileBadge = ref('Pro Member'); // Badge indicator
     const profilePicture = ref('https://via.placeholder.com/150');
-    const routes = [
-      { path: '/portal/homeview', label: 'Home' },
-      { path: '/portal/community', label: 'Community' },
-      { path: '/portal/mydashboard', label: 'MyDashboard' },
-      { path: '/portal/projects', label: 'Projects' },
-      { path: '/portal/settings', label: 'Settings' },
-    ];
 
-    function toggleDropdown() {
-      isOpen.value = !isOpen.value;
-    }
 
     function updatePassword() {
       if (isLoading.value) return;
@@ -98,7 +87,6 @@ export default defineComponent({
     }
 
     return {
-      isOpen,
       isLoading,
       hasError,
       successMessage,
@@ -108,8 +96,6 @@ export default defineComponent({
       twitterHandle,
       linkedInHandle,
       profileBadge,
-      toggleDropdown,
-      routes,
       updatePassword,
       updateName,
       updateEmail,
@@ -122,38 +108,6 @@ export default defineComponent({
 </script>
 
 <template>
-  <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4">
-    <div class="fixed top-0 right-0 px-4 py-2">
-      <router-link to="/login" class="bg-custom-peach text-white px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-orange-500">
-        Login
-      </router-link>
-
-      <div class="relative inline-block text-left">
-        <button @click="toggleDropdown" class="bg-black text-white px-4 py-1 hover:underline rounded-lg shadow-md hover:bg-gray-400 focus:outline-none">
-          Menu
-        </button>
-      </div>  
-
-      <div v-if="isOpen" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-        <ul class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-            <li>
-            <router-link to="/portal/homeview" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Home</router-link>
-          </li>
-           <li>
-            <router-link to="/portal/settings" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Settings</router-link>
-          </li>
-          <li>
-            <router-link to="/portal/mydashboard" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Dashboard</router-link>
-          </li>
-          <li>
-            <button @click="logOut" class="text-gray-700 px-4 py-2 hover:underline rounded-lg shadow-md hover:bg-gray-100" role="menuitem">Logout</button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </header>
-
-  <!-- Profile Section -->
   <div class="container mx-auto p-4 mt-6 bg-gradient-to-r from-gray-600 to-orange-400 rounded-xl shadow-lg">
     <div class="flex items-center space-x-4 mb-6">
       <!-- Profile Picture Update Icon with File Input -->

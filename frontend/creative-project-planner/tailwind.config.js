@@ -7,7 +7,9 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        'app-bg': "url('@/assets/bg.png')", // Custom background image
+        'app-bg': "url('@/assets/background8.png')",
+        'hero-bg': "url('@/assets/bg.png')",
+        'hero-banner-bg': "url('@/assets/community2.png')",
       },
       colors: {
         'custom-teal': '#00BFA5',  // Tiffany Blue
@@ -18,4 +20,3 @@ export default {
   },
   plugins: [],
 }
-

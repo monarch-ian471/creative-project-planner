@@ -14,8 +14,6 @@ export default {
     },
     setup() {
         const projects = ref([]);
-        const isOpen = ref(false);
-        const router = useRouter();
 
         const fetchProjects = () => {
             // Simulated API call to fetch user's projects
@@ -29,86 +27,14 @@ export default {
             ];
         };
 
-        function toggleDropdown() {
-            isOpen.value = !isOpen.value;
-        }
-
-        function closeDropdown(event) {
-            const target = event.target;
-            if (!target.closest('.dropdown')) {
-                isOpen.value = false;
-            }
-        }
-
-        function logOut() {
-            router.push('/login');
-        }
-
-        onMounted(() => {
-            fetchProjects();
-            document.addEventListener('click', closeDropdown);
-        });
-
-        onBeforeUnmount(() => {
-            document.removeEventListener('click', closeDropdown);
-        });
-
         return {
             projects,
-            isOpen,
-            toggleDropdown,
-            logOut,
-            routes: [
-                { path: '/portal/homeview', label: 'Home' },
-                { path: '/portal/community', label: 'Community' },
-                { path: '/portal/mydashboard', label: 'My Dashboard' },
-                { path: '/portal/projects', label: 'Projects' },
-            ]
         };
     }
 };
 </script>
 
-<template>
-    <header class="flex flex-col items-center lg:flex-row lg:items-start lg:pr-4 transition-opacity duration-500 ease-in-out">
-        <div class="fixed top-0 right-0 px-4 py-2 z-50">
-            <router-link to="/login" class="bg-custom-peach text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-500 hover:scale-105 transition-transform duration-300 ease-in-out">Login</router-link>
-            <div class="relative inline-block text-left dropdown ml-4">
-                <button @click="toggleDropdown" class="bg-black text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-400 hover:scale-105 transition-transform duration-300 ease-in-out">
-                    Menu
-                </button>
-                <div
-                    v-show="isOpen"
-                    class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 transition-transform duration-300 ease-in-out transform scale-95"
-                >
-                    <ul class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                        <li>
-                            <router-link to="/portal/settings" class="text-gray-700 px-4 py-2 block hover:bg-gray-100 hover:scale-105 transition-transform duration-300 ease-in-out">Settings</router-link>
-                        </li>
-                        <li>
-                            <router-link to="/portal/mydashboard" class="text-gray-700 px-4 py-2 block hover:bg-gray-100 hover:scale-105 transition-transform duration-300 ease-in-out">My Dashboard</router-link>
-                        </li>
-                        <li>
-                            <button @click="logOut" class="text-gray-700 px-4 py-2 block hover:bg-gray-100 hover:scale-105 transition-transform duration-300 ease-in-out">Logout</button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>  
-        <div class="flex flex-col items-center lg:flex-row lg:items-start">
-            <nav class="mt-8 text-center lg:text-left lg:mt-4 lg:ml-4 rounded-lg shadow-md">
-                <router-link
-                    v-for="route in routes"
-                    :key="route.path"
-                    :to="route.path"
-                    class="inline-block px-4 py-2 border-l border-gray-300 first:border-0 hover:bg-orange-400 hover:scale-105 transition-transform duration-300 ease-in-out"
-                >
-                    {{ route.label }}
-                </router-link>
-            </nav>
-        </div>
-    </header>    
-
+<template>   
     <div class="container mx-auto p-4">
         <h1 class="text-4xl font-bold mb-6">User's Projects</h1>
 
