@@ -29,8 +29,16 @@ export default defineComponent({
       },
     ]);
 
+    const stats =[
+      {id: 1, name: 'Creators on the platform', value: '0.1+' },
+      {id: 2, name: 'Flat platform fee', value: '0%' },
+      {id: 3, name: 'Uptime guarantee', value: '99.9%' },
+      {id: 4, name: 'Paid out to creators', value: '8,000+' },
+    ]
+
     return {
       faqs,
+      stats,
     };
   },
 });
@@ -94,13 +102,31 @@ export default defineComponent({
   </div>
 </section>
 
-
-    <!-- <section class="mt-8 bg-hero-banner-bg bg-cover bg-center animate__animated animate__fadeIn animate__delay-1s">
-      <div class="bg-gray-500 text-white p-6 rounded-lg shadow-lg text-center relative">
+    <section class="mt-8 bg-hero-banner-bg bg-cover bg-center animate__animated animate__fadeIn animate__delay-1s min-h-[350px] text-center flex flex-col justify-between">
+      <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg text-center relative">
         <h2 class="text-3xl font-bold">Exciting New Updates Coming Soon!</h2>
         <p class="text-lg">Stay tuned for our latest features and improvements. We’re constantly working to make your project planning experience even better!</p>
       </div>
-    </section> -->
+    </section>
+
+  <section  class="mt-12">
+      <div class="bg-grey bg-opacity-75 py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:max-w-none">
+          <div class="text-center">
+            <h2 class="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Trusted by Creators</h2>
+            <p class="mt-4 text-lg/8 text-white bg-black bg-opacity-75 p-6 rounded-lg">Empowering visionaries and innovators worldwide, our platform is trusted by creators to turn ideas into reality. Join a community that thrives on creativity, collaboration, and results.</p>
+          </div>
+          <dl class="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
+            <div v-for="stat in stats" :key="stat.id" class="flex flex-col bg-gray-400/5 p-8">
+              <dt class="text-sm/6 font-semibold text-gray-600">{{ stat.name }}</dt>
+              <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900">{{ stat.value }}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
 
     <section class="mt-8">
       <h2 class="text-3xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
@@ -115,8 +141,17 @@ export default defineComponent({
     </section>
   </main>
 
-  <footer class="bg-black bg-opacity-75 text-white py-8">
+  <footer class="bg-black bg-opacity-75 text-white py-8 rounded-lg shadow-md">
     <div class="container mx-auto px-6 md:px-12 flex justify-between items-center">
+
+      <!-- Contact Details Section -->
+      <div class="text-center md:text-left mt-6 md:mt-0">
+        <p class="text-4xl font-semibold mb-6">GET IN TOUCH</p>
+        <p>Phone: +265(0)986-610-1535</p>
+        <p>Email: <a href="mailto:iankatengeza@gmail.com" class="text-orange-500 hover:text-orange-400">iankatengeza@gmail.com</a></p>
+        <p>Address: New Area 12 | 526 Songwe St, Lilongwe, Malawi</p>
+      </div>
+
       <!-- Social Media Links Section -->
       <div class="flex space-x-6">
         <a href="https://www.facebook.com/share/19UmVXdUEd/?mibextid=LQQJ4d" class="text-gray-300 hover:text-white transition-colors duration-200">
@@ -128,14 +163,6 @@ export default defineComponent({
         <a href="https://www.linkedin.com/in/ian-katengeza-2529a0206?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" class="text-gray-300 hover:text-white transition-colors duration-200">
           <i class="fab fa-linkedin-in text-2xl"></i>
         </a>
-      </div>
-
-      <!-- Contact Details Section -->
-      <div class="text-center md:text-right mt-6 md:mt-0">
-        <p class="text-lg font-semibold">Contact Us</p>
-        <p>Phone: +265(0)986-610-1535</p>
-        <p>Email: <a href="mailto:iankatengeza@gmail.com" class="text-orange-500 hover:text-orange-400">iankatengeza@gmail.com</a></p>
-        <p>Address: New Area 12 | 526 Songwe St, Lilongwe, Malawi</p>
       </div>
     </div>
   </footer>
