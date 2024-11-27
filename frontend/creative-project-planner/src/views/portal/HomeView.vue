@@ -155,11 +155,9 @@ export default defineComponent({
                   >
                     <span class="text-base/7 font-semibold">{{ faq.question }}</span>
                     <span class="ml-6 flex h-7 items-center">
-                      <!-- "+" Icon -->
                       <svg v-if="!faq.open" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black-300 hover:text-orange-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
-                      <!-- "-" Icon -->
                       <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black-300 hover:text-orange-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
                       </svg>
@@ -177,15 +175,15 @@ export default defineComponent({
     </section>
   </main>
 
-  <footer class="bg-black bg-opacity-75 text-white py-8 rounded-lg shadow-md">
+  <footer class="bg-black bg-opacity-75 text-white py-16 rounded-lg shadow-md">
     <div class="container mx-auto px-6 md:px-12 flex justify-between items-center">
 
       <!-- Contact Details Section -->
       <div class="text-center md:text-left mt-6 md:mt-0">
         <p class="text-4xl font-semibold mb-6">GET IN TOUCH</p>
-        <p>Phone: +265(0)986-610-1535</p>
+        <p>Phone: <a href="" class="text-orange-500 hover:text-orange-400">+265(0)986-610-1535</a></p>
         <p>Email: <a href="mailto:iankatengeza@gmail.com" class="text-orange-500 hover:text-orange-400">iankatengeza@gmail.com</a></p>
-        <p>Address: New Area 12 | 526 Songwe St, Lilongwe, Malawi</p>
+        <p>Address: <a href="" class="text-orange-500 hover:text-orange-400"> New Area 12 | 526 Songwe St, Lilongwe, Malawi</a></p>
       </div>
 
       <!-- Social Media Links Section -->
