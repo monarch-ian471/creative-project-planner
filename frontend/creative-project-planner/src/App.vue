@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -10,6 +10,7 @@ export default defineComponent({
     // State management
     const isMobileMenuOpen = ref(false);
     const isUserMenuOpen = ref(false);
+    let menuTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const toggleMobileMenu = () => {
       isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -25,6 +26,32 @@ export default defineComponent({
       }
     };
 
+    const openUserMenu = () => {
+      isUserMenuOpen.value = true;
+      resetMenuTimeout();
+    };
+
+    const closeUserMenu = () => {
+      isUserMenuOpen.value = false;
+      if (menuTimeout) {
+        clearTimeout(menuTimeout);
+        menuTimeout = null;
+      }
+    };
+
+    const resetMenuTimeout = () => {
+      if (menuTimeout) {
+        clearTimeout(menuTimeout);
+      }
+      menuTimeout = setTimeout(closeUserMenu, 25000); // Menu will close after 5 seconds of inactivity
+    };
+    
+    onUnmounted(() => {
+      if (menuTimeout) {
+        clearTimeout(menuTimeout);
+      }
+    });
+
     const logOut = () => {
       router.push('/login');
     };
@@ -37,6 +64,8 @@ export default defineComponent({
     ];
     return {
       isMobileMenuOpen,
+      closeUserMenu,
+      resetMenuTimeout,
       isUserMenuOpen,
       toggleMobileMenu,
       toggleUserMenu,
@@ -92,38 +121,40 @@ export default defineComponent({
       </div>
     </div>
 
-    <!-- User Menu -->
-    <div class="relative">
-      <button
-        @click="toggleUserMenu"
-        class="px-4 py-2 rounded-lg bg-orange-500 text-white shadow-md hover:bg-orange-600 focus:outline-none"
-      >
-        Menu
-      </button>
+  <!-- User Menu -->
+  <div class="relative">
+        <button
+          @click="toggleUserMenu"
+          class="px-4 py-2 rounded-lg bg-orange-500 text-white shadow-md hover:bg-orange-600 focus:outline-none"
+        >
+          Menu
+        </button>
 
-      <div
-        v-if="isUserMenuOpen"
-        class="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-50"
-      >
-        <ul>
-          <li>
-            <router-link to="/portal/settings" class="block px-4 py-2 hover:bg-gray-200">
-              Settings
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/portal/mydashboard" class="block px-4 py-2 hover:bg-gray-200">
-              Dashboard
-            </router-link>
-          </li>
-          <li>
-            <button @click="logOut" class="block w-full text-left px-4 py-2 hover:bg-gray-200">
-              Logout
-            </button>
-          </li>
-        </ul>
+        <div
+          v-if="isUserMenuOpen"
+          class="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-50"
+          @mouseenter="resetMenuTimeout"
+          @mouseleave="closeUserMenu"
+        >
+          <ul>
+            <li>
+              <router-link to="/portal/settings" class="block px-4 py-2 rounded-md hover:bg-orange-200">
+                Settings
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/portal/mydashboard" class="block px-4 py-2 rounded-md hover:bg-orange-200">
+                Dashboard
+              </router-link>
+            </li>
+            <li>
+              <button @click="logOut" class="block w-full text-left px-4 py-2 rounded-md hover:bg-orange-200">
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
   </header>
 
     <main class="flex-grow p-6">

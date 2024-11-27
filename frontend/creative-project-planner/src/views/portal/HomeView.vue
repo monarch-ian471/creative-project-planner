@@ -1,5 +1,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+// import paintingImage from '@/assets/painting.png';
+// import muralPaintingImage from '@/assets/mural-painter.png';
+// import chairMakingImage from '@/assets/chair-making.png';
 
 export default defineComponent({
   name: 'App',
@@ -31,6 +34,27 @@ export default defineComponent({
       },
     ]);
 
+    // const collections = [
+    //   {
+    //     name: "Painting",
+    //     href: '#',
+    //     imageSrc: paintingImage,
+    //     imageAlt: 'Painter painting an image.',
+    //   },
+    //   {
+    //     name: "Mural",
+    //     href: '#',
+    //     imageSrc: muralPaintingImage,
+    //     imageAlt: 'Mural Painting.',
+    //   },
+    //   {
+    //     name: 'Furniture',
+    //     href: '#',
+    //     imageSrc: chairMakingImage,
+    //     imageAlt: 'Making a chair.',
+    //   },
+    // ]
+
     const stats = [
       { id: 1, name: 'Creators on the platform', value: '0.1+' },
       { id: 2, name: 'Flat platform fee', value: '0%' },
@@ -46,6 +70,7 @@ export default defineComponent({
       faqs,
       stats,
       toggleFaq,
+      // collections,
     };
   },
 });
@@ -76,10 +101,9 @@ export default defineComponent({
           </p>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Card 1: Organize Your Ideas -->
             <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
               <div>
-                <i class="fas fa-lightbulb text-4xl mb-4"></i> <!-- Icon for Organize Your Ideas -->
+                <i class="fas fa-lightbulb text-4xl mb-4"></i> 
                 <h3 class="text-2xl font-semibold mb-4">Organize Your Ideas</h3>
                 <p>
                   Capture and store all your creative thoughts in one centralized place. Whether it's an idea for a new project, a vision for your next big move, or random sparks of inspiration, keep everything organized and easily accessible. This feature allows you to revisit your thoughts, refine them, and take action when you're ready. Stay creative without losing track of your brilliance.
@@ -87,10 +111,9 @@ export default defineComponent({
               </div>
             </div>
 
-            <!-- Card 2: Plan Your Projects -->
             <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
               <div>
-                <i class="fas fa-calendar-check text-4xl mb-4"></i> <!-- Icon for Plan Your Projects -->
+                <i class="fas fa-calendar-check text-4xl mb-4"></i>
                 <h3 class="text-2xl font-semibold mb-4">Plan Your Projects</h3>
                 <p>
                   Turn your ideas into actionable plans by structuring your projects with clear tasks, deadlines, and milestones. Stay organized and stay on track by breaking down big projects into manageable steps. Whether you are planning a product launch, a marketing campaign, or a team event, this feature will help you map out every detail, ensuring you meet your goals with precision and clarity.
@@ -98,10 +121,9 @@ export default defineComponent({
               </div>
             </div>
 
-            <!-- Card 3: Collaborate with Teams -->
             <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
               <div>
-                <i class="fas fa-users text-4xl mb-4"></i> <!-- Icon for Collaborate with Teams -->
+                <i class="fas fa-users text-4xl mb-4"></i> 
                 <h3 class="text-2xl font-semibold mb-4">Collaborate with Teams</h3>
                 <p>
                   Seamless collaboration is key to any successful project. With this feature, you can assign tasks, set deadlines, and track progress in real-time with your team members. Communication, task delegation, and progress tracking have never been easier. Whether you're working remotely or in the same office, this feature helps keep everyone aligned and accountable, fostering a productive and positive work environment.
@@ -110,6 +132,61 @@ export default defineComponent({
             </div>
           </div>
         </section>
+
+        <!-- <div class="relative mt-8">
+            <div aria-hidden="true" class="absolute inset-0 hidden sm:flex sm:flex-col">
+              <div class="relative w-full flex-1 bg-gray-800">
+                <div class="absolute inset-0 overflow-hidden rounded-lg">
+                  <img src="https://tailwindui.com/plus/img/ecommerce-images/home-page-04-hero-full-width.jpg" alt="" class="size-full object-cover" />
+                </div>
+                <div class="absolute inset-0 bg-gray-900 opacity-50" />
+              </div>
+              <div class="h-32 w-full bg-white md:h-40 lg:h-48" />
+            </div>
+
+            <div class="relative mx-auto max-w-3xl px-4 pb-96 text-center sm:px-6 sm:pb-0 lg:px-8">
+
+              <div aria-hidden="true" class="absolute inset-0 flex flex-col sm:hidden">
+                <div class="relative w-full flex-1 bg-gray-800">
+                  <div class="absolute inset-0 overflow-hidden">
+                    <img src="https://tailwindui.com/plus/img/ecommerce-images/home-page-04-hero-full-width.jpg" alt="" class="size-full object-cover" />
+                  </div>
+                  <div class="absolute inset-0 bg-gray-900 opacity-50" />
+                </div>
+                <div class="h-48 w-full bg-white" />
+              </div>
+              <div class="relative py-16">
+                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">Recents On Projects</h1>
+                <div class="mt-2 sm:mt-6">
+                  <a href="/portal/community" class="inline-block border border-transparent bg-orange-500 px-8 py-3 font-medium text-white hover:bg-orange-700">Community</a>
+                </div>
+              </div>
+            </div>
+
+            <section aria-labelledby="collection-heading" class="relative -mt-96 sm:mt-0">
+              <h2 id="collection-heading" class="sr-only">Community</h2>
+              <div class="mx-auto grid max-w-md grid-cols-1 gap-y-6 px-4 sm:max-w-7xl sm:grid-cols-3 sm:gap-x-6 sm:gap-y-0 sm:px-6 lg:gap-x-8 lg:px-8">
+                <div v-for="collection in collections" :key="collection.name" class="group relative h-96 rounded-lg bg-white shadow-xl sm:aspect-[4/5] sm:h-auto">
+                  <div aria-hidden="true" class="absolute inset-0 overflow-hidden rounded-lg">
+                    <div class="absolute inset-0 overflow-hidden group-hover:opacity-75">
+                      <img :src="collection.imageSrc" :alt="collection.imageAlt" class="size-full object-cover" />
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50" />
+                  </div>
+                  <div class="absolute inset-0 flex items-end rounded-lg p-6">
+                    <div>
+                      <h3 class="mt-1 font-semibold text-white">
+                        <a :href="collection.href">
+                          <span class="absolute inset-0" />
+                          {{ collection.name }}
+                        </a>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            </div> -->
 
     <section class="mt-8 bg-hero-banner-bg bg-cover bg-center animate__animated animate__fadeIn animate__delay-1s min-h-[350px] text-center flex flex-col justify-between">
       <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg text-center relative">
@@ -136,6 +213,17 @@ export default defineComponent({
       </div>
     </div>
   </section>
+
+  <div class="relative mt-2">
+    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+      <div class="w-full border-t border-gray-300" />
+    </div>
+    <div class="relative flex justify-center">
+      <span class="bg-white px-2 text-orange-500">
+         +
+      </span>
+    </div>
+  </div>
 
   <section class="mt-8">
       <div class="bg-grey bg-opacity-75 mb-8 rounded-lg border border-black">
