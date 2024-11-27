@@ -1,121 +1,157 @@
 <script lang="ts">
-import { defineComponent, onMounted, onBeforeUnmount, ref } from 'vue';
+import { defineComponent, ref, onMounted, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuth } from '@/composables/useAuth';
-import { deleteProject as deleteProjectService, addProject as addProjectService, updateProject as updateProjectService } from '@/services/projectService';
+import { getProjects, getTasks } from '@/services/projectService';
+import GanttChart from 'vue-ganttastic';
+import FullCalendar from '@fullcalendar/vue3';
+import dayGridPlugin from '@fullcalendar/daygrid';
 
 export default defineComponent({
-    name: 'MyDashboard',
-    setup() {
-        const { user } = useAuth(); // Fetch user data from useAuth
-        const projects = ref([
-            { id: 1, name: 'Painting the house', status: 'In Progress' },
-            { id: 2, name: 'Make an arm chair', status: 'Completed' },
-            { id: 3, name: 'Mini project for school', status: 'Pending' },
-        ]);
+  name: 'MyDashboard',
+  components: {
+    GanttChart,
+    FullCalendar,
+  },
+  setup() {
+    const router = useRouter();
 
-        const router = useRouter();
+    // State variables
+    const projects = ref([]);
+    const tasks = ref([]);
+    const ganttData = ref([]);
+    const calendarEvents = ref([]);
+    const userPreferences = reactive({
+      showCalendar: true,
+      showGantt: true,
+    });
 
+    const calendarOptions = ref({});
 
-        function addProject() {
-            const newProject = { id: Date.now(), name: 'New Project', status: 'Pending', description: 'New project description' };
-            projects.value.push(newProject);
-            addProjectService(newProject);
-        }
+    // Fetch projects and tasks
+    const fetchData = async () => {
+      try {
+        projects.value = (await getProjects()) || [];
+        tasks.value = (await getTasks()) || [];
 
-        function editProject(project: any) {
-            const updatedProjectName = prompt('Enter the new project name:', project.name);
-            if (updatedProjectName !== null) {
-                const updatedProject = { ...project, name: updatedProjectName, description: 'Updated project description' };
-                const index = projects.value.findIndex(p => p.id === project.id);
-                if (index !== -1) {
-                    projects.value[index] = updatedProject;
-                    updateProjectService(updatedProject, project.id);
-                }
-            }
-        }
+        // Prepare Gantt data
+        ganttData.value = tasks.value.map((task) => ({
+          id: task.id,
+          label: task.title,
+          startsAt: new Date(task.start_date || Date.now()),
+          endsAt: new Date(task.due_date || Date.now()),
+          project: task.project_id,
+        }));
 
-        function deleteProject(project: any) {
-            projects.value = projects.value.filter(p => p.id !== project.id);
-            deleteProjectService(project.id);
-        }
+        // Prepare Calendar events
+        calendarEvents.value = tasks.value.map((task) => ({
+          title: task.title,
+          start: task.start_date,
+          end: task.due_date,
+        }));
 
-        function changeStatus(project: any) {
-            const statuses = ['In Progress', 'Completed', 'Pending'];
-            const currentIndex = statuses.indexOf(project.status);
-            const nextIndex = (currentIndex + 1) % statuses.length;
-            const updatedProject = { ...project, status: statuses[nextIndex] };
-            const index = projects.value.findIndex(p => p.id === project.id);
-            if (index !== -1) {
-                projects.value[index] = updatedProject;
-                updateProjectService(updatedProject, project.id);
-            }
-        }
-
-        function settings() {
-            router.push('/portal/settings');
-        }
-
-        return {
-            user,
-            projects,
-            addProject,
-            editProject,
-            deleteProject,
-            changeStatus,
-            settings,
+        // Initialize calendar options
+        calendarOptions.value = {
+          plugins: [dayGridPlugin],
+          initialView: 'dayGridMonth',
+          events: calendarEvents.value,
         };
-    },
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    // Initial data fetch
+    onMounted(fetchData);
+
+    // Watch for calendar event updates
+    watch(calendarEvents, (newEvents) => {
+      if (calendarOptions.value) {
+        calendarOptions.value.events = newEvents;
+      }
+    });
+
+    // Navigate to settings page
+    const goToSettings = () => {
+      router.push('/portal/settings');
+    };
+
+    const goToProject = (id: string) => {
+      router.push(`/portal/project/${id}`);
+    };
+
+    return {
+      projects,
+      tasks,
+      ganttData,
+      calendarEvents,
+      userPreferences,
+      calendarOptions,
+      goToSettings,
+      goToProject,
+    };
+  },
 });
 </script>
 
 <template>
-    <div class="container mx-auto p-4">
-        <div class="bg-white shadow-md rounded-lg p-6 transition-opacity duration-500 ease-in-out opacity-100">
-            <h1 class="text-4xl font-bold mb-4">Welcome, John Doe!</h1>
-            
-            <!-- User Profile Section -->
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-2">User Profile</h2>
-                <div class="flex items-center space-x-4">
-                    <img class="w-12 h-15 rounded-full" src=" " alt="User Avatar">
-                    <div>
-                        <p class="text-lg font-medium">John Doe</p>
-                        <p class="text-gray-600">johndoe@example.com</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Projects Table Section -->
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-2">Projects</h2>
-                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-md">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="py-2 px-4 border-b">Project Name</th>
-                            <th class="py-2 px-4 border-b">Status</th>
-                            <th class="py-2 px-4 border-b">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="project in projects" :key="project.id" class="hover:bg-gray-50 hover:scale-105 transition-transform duration-300 ease-in-out">
-                            <td class="py-2 px-4 border-b text-center">{{ project.name }}</td>
-                            <td class="py-2 px-4 border-b text-center">{{ project.status }}</td>
-                            <td class="py-2 px-4 border-b text-center">
-                                <button @click="editProject(project)" class="bg-custom-lime text-white px-4 py-2 rounded hover:bg-yellow-300 hover:scale-105 transition-transform duration-300 ease-in-out">Edit</button>
-                                <button @click="deleteProject(project)" class="bg-custom-peach text-white px-4 py-2 rounded ml-2 hover:bg-red-300 hover:scale-105 transition-transform duration-300 ease-in-out">Delete</button>
-                                <button @click="changeStatus(project)" class="bg-teal-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-300 hover:scale-105 transition-transform duration-300 ease-in-out">Change Status</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Navigation Section -->
-            <div class="flex space-x-4">
-                <button @click="addProject" class="bg-custom-peach text-white px-4 py-2 rounded hover:bg-orange-400 hover:scale-105 transition-transform duration-300 ease-in-out">Add New Project</button>
-                <button @click="settings" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-400 hover:scale-105 transition-transform duration-300 ease-in-out">Settings</button>
-            </div>
+  <div class="container mx-auto p-4">
+    <h1 class="text-4xl font-bold mb-4">Welcome to Your Dashboard</h1>
+
+    <!-- Settings Navigation -->
+    <div class="mb-6">
+      <button @click="goToSettings" class="bg-gray-800 text-white px-4 py-2 rounded">
+        Personalize Dashboard
+      </button>
+    </div>
+
+    <!-- Compact Cards for Projects -->
+    <div v-if="projects.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+      <div
+        v-for="project in projects"
+        :key="project.id"
+        class="bg-white rounded shadow-md p-4 border hover:shadow-lg transition-shadow"
+      >
+        <h2 class="text-lg font-bold">{{ project.name }}</h2>
+        <p>Status: {{ project.status }}</p>
+        <p>Due: {{ project.end_date }}</p>
+        <button @click="goToProject(project.id)" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
+          View Details
+        </button>
+      </div>
+    </div>
+    <div v-else class="text-center text-gray-500">No projects available.</div>
+
+    <!-- Optional Calendar -->
+    <div v-if="userPreferences.showCalendar && calendarOptions" class="mb-6">
+      <h2 class="text-xl font-bold mb-4">Calendar</h2>
+      <FullCalendar v-bind="calendarOptions" />
+    </div>
+
+    <!-- Gantt Timeline -->
+    <div v-if="userPreferences.showGantt && ganttData.length > 0" class="mb-6">
+      <h2 class="text-xl font-bold mb-4">Gantt Timeline</h2>
+      <GanttChart
+        :rows="ganttData"
+        :columns="['label', 'startsAt', 'endsAt']"
+        :columnHeaderStyle="{ color: '#4a4a4a', fontWeight: 'bold' }"
+      />
+    </div>
+
+    <!-- Task Management -->
+    <div v-if="tasks.length > 0" class="mb-6">
+      <h2 class="text-xl font-bold mb-4">Tasks</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          v-for="task in tasks"
+          :key="task.id"
+          class="bg-white rounded shadow-md p-4 border"
+        >
+          <h3 class="text-lg font-bold">{{ task.title }}</h3>
+          <p>Status: {{ task.status }}</p>
+          <p>Due: {{ task.due_date }}</p>
         </div>
+      </div>
+    </div>
+    <div v-else class="text-center text-gray-500">No tasks available.</div>
     </div>
 </template>
