@@ -1,48 +1,57 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'App',
   setup() {
-
     const faqs = ref([
       {
         question: 'What is a Creative Project Planner?',
         answer:
           'Creative Project Planner is a tool designed to help you organize, plan, and collaborate on your creative projects. It provides features to keep track of your ideas, break down projects into tasks, and work seamlessly with your team.',
+        open: false,
       },
       {
         question: 'How do I get started?',
         answer:
           "To get started, simply sign up for an account by clicking on the 'Get Started Now' button on the home page. Once registered, you can start planning your projects and collaborating with your team.",
+        open: false,
       },
       {
         question: 'Can I collaborate with others?',
         answer:
           'Yes, Creative Project Planner allows you to collaborate with your team members. You can share ideas, assign tasks, and track progress in real-time to ensure everyone is on the same page.',
+        open: false,
       },
       {
         question: 'Is there a mobile app available?',
         answer:
           'Currently, Creative Project Planner is available as a web application. We are working on developing a mobile app to provide you with more flexibility and convenience.',
+        open: false,
       },
     ]);
 
-    const stats =[
-      {id: 1, name: 'Creators on the platform', value: '0.1+' },
-      {id: 2, name: 'Flat platform fee', value: '0%' },
-      {id: 3, name: 'Uptime guarantee', value: '99.9%' },
-      {id: 4, name: 'Paid out to creators', value: '8,000+' },
-    ]
+    const stats = [
+      { id: 1, name: 'Creators on the platform', value: '0.1+' },
+      { id: 2, name: 'Flat platform fee', value: '0%' },
+      { id: 3, name: 'Uptime guarantee', value: '99.9%' },
+      { id: 4, name: 'Paid out to creators', value: '8,000+' },
+    ];
+
+    const toggleFaq = (index: number) => {
+      faqs.value[index].open = !faqs.value[index].open;
+    };
 
     return {
       faqs,
       stats,
+      toggleFaq,
     };
   },
 });
 </script>
+
+
 
 <template>
   <main class="container mx-auto mt-8">
@@ -61,46 +70,46 @@ export default defineComponent({
       </section>
 
       <section class="mt-12">
-  <h2 class="text-4xl font-bold mb-6 animate-fade-in text-center">Features</h2>
-  <p class="text-lg mb-6 text-center">
-    Explore the features that make planning your projects simple, efficient, and collaborative.
-  </p>
+          <h2 class="text-4xl font-bold mb-6 animate-fade-in text-center">Features</h2>
+          <p class="text-lg mb-6 text-center">
+            Explore the features that make planning your projects simple, efficient, and collaborative.
+          </p>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Card 1: Organize Your Ideas -->
-    <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
-      <div>
-        <i class="fas fa-lightbulb text-4xl mb-4"></i> <!-- Icon for Organize Your Ideas -->
-        <h3 class="text-2xl font-semibold mb-4">Organize Your Ideas</h3>
-        <p>
-          Capture and store all your creative thoughts in one centralized place. Whether it's an idea for a new project, a vision for your next big move, or random sparks of inspiration, keep everything organized and easily accessible. This feature allows you to revisit your thoughts, refine them, and take action when you're ready. Stay creative without losing track of your brilliance.
-        </p>
-      </div>
-    </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Card 1: Organize Your Ideas -->
+            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
+              <div>
+                <i class="fas fa-lightbulb text-4xl mb-4"></i> <!-- Icon for Organize Your Ideas -->
+                <h3 class="text-2xl font-semibold mb-4">Organize Your Ideas</h3>
+                <p>
+                  Capture and store all your creative thoughts in one centralized place. Whether it's an idea for a new project, a vision for your next big move, or random sparks of inspiration, keep everything organized and easily accessible. This feature allows you to revisit your thoughts, refine them, and take action when you're ready. Stay creative without losing track of your brilliance.
+                </p>
+              </div>
+            </div>
 
-    <!-- Card 2: Plan Your Projects -->
-    <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
-      <div>
-        <i class="fas fa-calendar-check text-4xl mb-4"></i> <!-- Icon for Plan Your Projects -->
-        <h3 class="text-2xl font-semibold mb-4">Plan Your Projects</h3>
-        <p>
-          Turn your ideas into actionable plans by structuring your projects with clear tasks, deadlines, and milestones. Stay organized and stay on track by breaking down big projects into manageable steps. Whether you are planning a product launch, a marketing campaign, or a team event, this feature will help you map out every detail, ensuring you meet your goals with precision and clarity.
-        </p>
-      </div>
-    </div>
+            <!-- Card 2: Plan Your Projects -->
+            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
+              <div>
+                <i class="fas fa-calendar-check text-4xl mb-4"></i> <!-- Icon for Plan Your Projects -->
+                <h3 class="text-2xl font-semibold mb-4">Plan Your Projects</h3>
+                <p>
+                  Turn your ideas into actionable plans by structuring your projects with clear tasks, deadlines, and milestones. Stay organized and stay on track by breaking down big projects into manageable steps. Whether you are planning a product launch, a marketing campaign, or a team event, this feature will help you map out every detail, ensuring you meet your goals with precision and clarity.
+                </p>
+              </div>
+            </div>
 
-    <!-- Card 3: Collaborate with Teams -->
-    <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
-      <div>
-        <i class="fas fa-users text-4xl mb-4"></i> <!-- Icon for Collaborate with Teams -->
-        <h3 class="text-2xl font-semibold mb-4">Collaborate with Teams</h3>
-        <p>
-          Seamless collaboration is key to any successful project. With this feature, you can assign tasks, set deadlines, and track progress in real-time with your team members. Communication, task delegation, and progress tracking have never been easier. Whether you're working remotely or in the same office, this feature helps keep everyone aligned and accountable, fostering a productive and positive work environment.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
+            <!-- Card 3: Collaborate with Teams -->
+            <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 min-h-[350px] text-center flex flex-col justify-between">
+              <div>
+                <i class="fas fa-users text-4xl mb-4"></i> <!-- Icon for Collaborate with Teams -->
+                <h3 class="text-2xl font-semibold mb-4">Collaborate with Teams</h3>
+                <p>
+                  Seamless collaboration is key to any successful project. With this feature, you can assign tasks, set deadlines, and track progress in real-time with your team members. Communication, task delegation, and progress tracking have never been easier. Whether you're working remotely or in the same office, this feature helps keep everyone aligned and accountable, fostering a productive and positive work environment.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
     <section class="mt-8 bg-hero-banner-bg bg-cover bg-center animate__animated animate__fadeIn animate__delay-1s min-h-[350px] text-center flex flex-col justify-between">
       <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg text-center relative">
@@ -109,8 +118,8 @@ export default defineComponent({
       </div>
     </section>
 
-  <section  class="mt-12">
-      <div class="bg-grey bg-opacity-75 py-24 sm:py-32">
+  <section  class="mt-8">
+      <div class="bg-grey bg-opacity-75 py-12 sm:py-16">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <div class="mx-auto max-w-2xl lg:max-w-none">
           <div class="text-center">
@@ -128,15 +137,42 @@ export default defineComponent({
     </div>
   </section>
 
-    <section class="mt-8">
-      <h2 class="text-3xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
-      <div
-        v-for="faq in faqs"
-        :key="faq.question"
-        class="faq-item bg-black bg-opacity-75 p-6 mb-4 rounded-lg shadow-md transform hover:scale-105 transition duration-300 max-w-screen-lg mx-auto"
-      >
-        <h3 class="text-2xl text-white font-semibold mb-3">{{ faq.question }}</h3>
-        <p class="text-lg text-gray-200">{{ faq.answer }}</p>
+  <section class="mt-8">
+      <div class="bg-grey bg-opacity-75 mb-8 rounded-lg border border-black">
+        <div class="mx-auto max-w-7xl px-3 py-6 sm:py-8 lg:px-4 lg:py-20">
+          <div class="mx-auto max-w-4xl divide-y divide-gray-900/10">
+            <h2 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Frequently asked questions</h2>
+            <dl class="mt-5 space-y-6 divide-y divide-gray-900/10">
+              <div 
+                v-for="(faq, index) in faqs" 
+                :key="index" 
+                class="pt-6"
+              >
+                <dt>
+                  <button 
+                    @click="toggleFaq(index)" 
+                    class="flex w-full items-start justify-between text-left text-gray-900"
+                  >
+                    <span class="text-base/7 font-semibold">{{ faq.question }}</span>
+                    <span class="ml-6 flex h-7 items-center">
+                      <!-- "+" Icon -->
+                      <svg v-if="!faq.open" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black-300 hover:text-orange-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <!-- "-" Icon -->
+                      <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black-300 hover:text-orange-500 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                      </svg>
+                    </span>
+                  </button>
+                </dt>
+                <dd v-if="faq.open" class="mt-2 pr-12">
+                  <p class="text-base/7 text-gray-600">{{ faq.answer }}</p>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -154,13 +190,13 @@ export default defineComponent({
 
       <!-- Social Media Links Section -->
       <div class="flex space-x-6">
-        <a href="https://www.facebook.com/share/19UmVXdUEd/?mibextid=LQQJ4d" class="text-gray-300 hover:text-white transition-colors duration-200">
+        <a href="https://www.facebook.com/share/19UmVXdUEd/?mibextid=LQQJ4d" class="text-gray-300 hover:text-orange-500 transition-colors duration-200">
           <i class="fab fa-facebook-f text-2xl"></i>
         </a>
-        <a href="https://www.instagram.com/ian.monarch_471?igsh=MXV6NHlodHdvY2NyaA%3D%3D&utm_source=qr" class="text-gray-300 hover:text-white transition-colors duration-200">
+        <a href="https://www.instagram.com/ian.monarch_471?igsh=MXV6NHlodHdvY2NyaA%3D%3D&utm_source=qr" class="text-gray-300 hover:text-orange-500 transition-colors duration-200">
           <i class="fab fa-instagram text-2xl"></i>
         </a>
-        <a href="https://www.linkedin.com/in/ian-katengeza-2529a0206?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" class="text-gray-300 hover:text-white transition-colors duration-200">
+        <a href="https://www.linkedin.com/in/ian-katengeza-2529a0206?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" class="text-gray-300 hover:text-orange-500 transition-colors duration-200">
           <i class="fab fa-linkedin-in text-2xl"></i>
         </a>
       </div>
