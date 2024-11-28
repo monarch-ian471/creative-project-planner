@@ -1,12 +1,10 @@
 const mongoose = require('mongoose');
-const User = require('./models/user.js').User;
+const { User } = require('../models/user');
 
 const connectDB = async () => {
   try {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
 
     console.log('MongoDB connected...');
@@ -19,8 +17,11 @@ const connectDB = async () => {
       console.log('No existing firstName index to drop');
     }
 
-    // Ensure other indexes are created
-    await User.createIndexes();
+    // Recreate indexes
+    await mongoose.connection.db.collection('users').createIndex({ email: 1 }, { unique: true });
+    await mongoose.connection.db.collection('users').createIndex({ firstName: 1 });
+
+    console.log('Indexes recreated successfully');
 
   } catch (error) {
     console.error('MongoDB Connection Error:', error);

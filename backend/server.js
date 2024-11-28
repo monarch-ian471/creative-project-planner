@@ -1,13 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const jwt = require('express-jwt');
+const jwt = require('jsonwebtoken'); // Direct import of jsonwebtoken
+const { expressjwt: expressJwt } = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const User = require('./models/user.js').User;
-const app = express();  // Initialize Express app
+const app = express();
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(cors());  // Enable CORS for all routes
 
 // Auth0 configuration
-const checkJwt = jwt({
+const checkJwt = expressJwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
@@ -87,7 +88,7 @@ app.post('/api/users/register', async (req, res) => {
       city,
       region,
       postalCode,
-      password: hashedPassword,
+      password,
       notifications,
     });
 
@@ -117,6 +118,7 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
+// In the login route, replace jwt.sign with jwt.sign from jsonwebtoken
 app.post('/api/users/login', async (req, res) => {
   console.log('Login attempt with:', req.body);
   const { email, password } = req.body;
@@ -130,12 +132,6 @@ app.post('/api/users/login', async (req, res) => {
 
       const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-          console.log('Password Verification Debug:', {
-            inputEmail: email,
-            inputPassword: password,
-            storedHashedPassword: user.password,
-            passwordMatch: isMatch,
-          });
           console.log('Password mismatch for user:', email);
           return res.status(401).json({ message: 'Invalid credentials' });
         }
