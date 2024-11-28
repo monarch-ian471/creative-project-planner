@@ -16,31 +16,30 @@ export default defineComponent({
     const errorMessage = ref(''); // Track the error message
 
     const handleLogin = async () => {
-      errorMessage.value = ''; // Clear previous errors
-      loading.value = true; // Show loading state
+        errorMessage.value = '';
+        
+        loading.value = true; 
 
-      try {
-        // Call your backend API for login
-        const response = await axios.post('http://localhost:3000/api/users/login', {
-          email: email.value,
-          password: password.value
-        });
+        try {
+          const response = await axios.post('http://localhost:3000/api/users/login', {
+            email: email.value,
+            password: password.value
+          });
 
-        // Assuming the response contains user data and a token
-        const { user: loggedInUser, token } = response.data;
+          const { user: loggedInUser, token } = response.data;
 
-        // Call the login method from useAuth to handle the authentication state
-        login(loggedInUser, token);
+          login(loggedInUser, token);
 
-        // Redirect the user to their dashboard after successful login
-        router.push('/portal/mydashboard');
-      } catch (error) {
-        // Display the error message
-        errorMessage.value = 'Login failed. Please check your credentials and try again.';
-      } finally {
-        loading.value = false; // Hide loading state once done
-      }
-    };
+          router.push('/portal/mydashboard');
+
+        } catch (error) {
+          errorMessage.value = 'Login failed. Please check your credentials and try again.';
+
+          console.error('Login error:', error);
+        } finally {
+          loading.value = false;
+        }
+      };
 
     return {
       email,

@@ -1,9 +1,9 @@
 import './assets/tailwind.css'; // Ensure this path is correct
-
+import store from './store'
 import { createApp } from 'vue';
 import App from '@/App.vue';
 import router from '@/router';
-// import { initializeAuth } from '@/views/auth/auth0'; // Commented out to test
+
 
 // Wrapping the Auth0 initialization in an async function
 async function initializeApp(): Promise<void> {
