@@ -1,7 +1,7 @@
 // routes/users.js
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/User');  // Import the User model
+const { User } = require('../models/user');  // Import the User model
 
 // POST /api/users/register - Register a new user
 router.post('/register', async (req, res) => {

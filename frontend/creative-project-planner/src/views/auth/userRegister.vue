@@ -84,11 +84,6 @@ const validateForm = (): boolean => {
 const handleSubmit = async (event: Event): Promise<void> => {
   event.preventDefault();
 
-  if (!isAuthenticated.value) {
-    router.push('/login');
-    return;
-  }
-
   if (validateForm()) {
     try {
       
@@ -112,6 +107,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
 
       if (response.status === 201) { // Check if the response status indicates success
         await router.push('/login');
+        console.log(response);
       } else {
         console.error('Unexpected response:', response);
       }

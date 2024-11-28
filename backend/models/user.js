@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   notifications: {
     sms: { type: Boolean, default: false },
-    email: { type: Boolean, default: false },
+    email: { type: Boolean, default: false }
   }
 });
 

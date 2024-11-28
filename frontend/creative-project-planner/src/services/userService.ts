@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { getAuth0Client } from '@/views/auth/auth0';  // Assuming you're using Auth0 for authentication
 
-const API_URL = 'http://localhost:3000/api/users'; // Your backend API for user registration
+const API_URL = 'http://localhost:3000/api/users/register'; // Your backend API for user registration
 
 // Define the types for User and UserData
 interface User {
@@ -21,20 +21,20 @@ interface User {
 }
 
 interface UserData {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    country: string;
-    streetAddress: string;
-    city: string;
-    region: string;
-    postalCode: string;
-    password: string; // Add password field here
-    notifications: {
-      sms: boolean;
-      email: boolean;
-    };
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  country: string;
+  streetAddress: string;
+  city: string;
+  region: string;
+  postalCode: string;
+  password: string;
+  notifications: {
+    sms: boolean;
+    email: boolean;
+  };
 }
 
 // Get the authorization headers
@@ -52,12 +52,12 @@ const getAuthHeaders = async (): Promise<{ headers: { Authorization: string } }>
 };
 
 // Create a new user (registration)
-export const registerUser = async (userData:UserData ) => {
-    try {
-      const response = await axios.post(API_URL, userData);
-      return response;
-    } catch (error) {
-      console.error('Error during registration:', error);
-      throw error;
-    }
-  };
+export const registerUser = async (userData: UserData): Promise<AxiosResponse> => {
+  try {
+    const response = await axios.post(API_URL, userData);
+    return response;
+  } catch (error) {
+    console.error('Error during registration:', error);
+    throw error;
+  }
+};

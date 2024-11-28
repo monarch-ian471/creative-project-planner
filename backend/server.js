@@ -4,9 +4,12 @@ const cors = require('cors');
 const { expressjwt: jwt } = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const bcrypt = require('bcrypt');
-const { User } = require('./models/User'); // Adjust the path as needed
+const User = require('./models/user.js').User;
 const app = express();  // Initialize Express app
+const bodyParser = require('body-parser');
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 // Middleware
 app.use(express.json());
 app.use(cors());  // Enable CORS for all routes
@@ -40,27 +43,40 @@ mongoose.connect(mongoURI)
 // User Registration Route
 app.post('/api/users/register', async (req, res) => {
   const { 
-    firstName, 
-    lastName, 
-    email, 
-    phone, 
-    country, 
-    streetAddress, 
-    city, 
-    region, 
-    postalCode, 
-    password, 
-    notifications } = req.body;
+    firstName,
+    lastName,
+    email,
+    phone,
+    country,
+    streetAddress,
+    city,
+    region,
+    postalCode,
+    password,
+    notifications 
+  } = req.body;
 
   try {
+
+    // Validate input - ensure all required fields are present
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Check database connection
+    if (!mongoose.connection.readyState) {
+      return res.status(500).json({ message: 'Database connection error' });
+    }
+
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10); // Consistent salt rounds
+      console.log('Raw Password:', password);
+      console.log('Hashed Password:', hashedPassword);
 
     // Create new user
     const newUser = new User({
@@ -90,36 +106,48 @@ app.post('/api/users/register', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('Error registering user:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Registration Error Details:', {
+      message: err.message,
+      stack: err.stack,
+      input: req.body // Log input to see what's being sent
+    });
+
+    res.status(500).json({ 
+      message: 'Server error during registration', 
+      error: err.message 
+    });
   }
 });
 
-// POST /api/users/login - Authenticate a user
 app.post('/api/users/login', async (req, res) => {
-    const { email, password } = req.body;
+  console.log('Login attempt with:', req.body);
+  const { email, password } = req.body;
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+  try {
+      const user = await User.findOne({ email });
+      if (!user) {
+          console.log('User not found for email:', email);
+          return res.status(404).json({ message: 'User not found' });
+      }
 
-        // Compare the password with the hashed password in the database
-        const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+          console.log('Password Verification Debug:', {
+            inputEmail: email,
+            inputPassword: password,
+            storedHashedPassword: user.password,
+            passwordMatch: isMatch,
+          });
+          console.log('Password mismatch for user:', email);
+          return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Create a token (optional, if you're using JWT)
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Return user data and token
-        res.json({ user, token });
-    } catch (error) {
-        console.error('Error logging in:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.json({ user, token });
+  } catch (error) {
+      console.error('Error logging in:', error);
+      res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // Example protected route

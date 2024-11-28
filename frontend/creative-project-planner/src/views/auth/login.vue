@@ -62,7 +62,7 @@ export default defineComponent({
     <div class="w-full max-w-md p-8 bg-white border border-orange-400 rounded-xl shadow-xl">
       <!-- Authenticated state -->
       <div v-if="isAuthenticated" class="text-center mb-6">
-        <p class="text-lg font-semibold text-gray-700">Welcome back, {{ user?.name }}!</p>
+        <p class="text-lg font-semibold text-gray-700">Welcome back, {{  }}!</p>
       </div>
 
       <!-- Login Form -->

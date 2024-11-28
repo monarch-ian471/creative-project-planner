@@ -1,33 +1,34 @@
+import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-// Define a User type or interface (you can modify this based on your needs)
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
 
 export function useAuth() {
-  const user = ref<User | null>(null);
+  const user = ref(null);
   const isAuthenticated = ref(false);
   const router = useRouter();
 
-  // Mock login function (replace this with your actual API call)
+  
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      // Example of setting user data (replace with actual API request)
-      user.value = {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com'
-      };
+      // Call backend login API
+      const response = await axios.post('http://localhost:3000/api/users/login', { email, password });
+  
+      // Extract user and token from response
+      const { user: loggedInUser, token } = response.data;
+  
+      // Save user state and set as authenticated
+      user.value = loggedInUser;
       isAuthenticated.value = true;
-
-      // Redirect to the dashboard or desired page after login
+  
+      // Optional: Save token to localStorage or cookies
+      localStorage.setItem('authToken', token);
+  
+      // Redirect to the dashboard
       await router.push('/portal/mydashboard');
-    } catch (error) {
-      console.error('Login failed', error);
+    } catch (error: any) {
+      console.error('Login failed', error.response?.data?.message || error.message);
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   };
 
