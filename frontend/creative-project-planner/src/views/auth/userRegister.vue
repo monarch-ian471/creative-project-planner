@@ -82,13 +82,14 @@ const validateForm = (): boolean => {
 const handleSubmit = async (event: Event): Promise<void> => {
   event.preventDefault();
 
-  // if (!isAuthenticated.value) {
-  //   router.push('/login');
-  //   return;
-  // }
+  if (!isAuthenticated.value) {
+    router.push('/login');
+    return;
+  }
 
   if (validateForm()) {
     try {
+      
       const response = await registerUser({
         // form fields
         firstName: form.value.firstName,

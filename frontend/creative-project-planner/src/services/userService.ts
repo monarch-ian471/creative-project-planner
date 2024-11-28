@@ -52,9 +52,9 @@ const getAuthHeaders = async (): Promise<{ headers: { Authorization: string } }>
 };
 
 // Create a new user (registration)
-export const registerUser = async (userData: { firstName: string; lastName: string; email: string; phone: string; country: string; streetAddress: string; city: string; region: string; postalCode: string; password: string; notifications: { sms: boolean; email: boolean; }; }) => {
+export const registerUser = async (userData:UserData ) => {
     try {
-      const response = await axios.post('/api/users/register', userData);
+      const response = await axios.post(API_URL, userData);
       return response;
     } catch (error) {
       console.error('Error during registration:', error);

@@ -36,13 +36,21 @@ mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB connected...'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// ---------------------------------------------
-// Routes
-// ---------------------------------------------
 
 // User Registration Route
 app.post('/api/users/register', async (req, res) => {
-  const { firstName, lastName, email, phone, country, streetAddress, city, region, postalCode, password, notifications } = req.body;
+  const { 
+    firstName, 
+    lastName, 
+    email, 
+    phone, 
+    country, 
+    streetAddress, 
+    city, 
+    region, 
+    postalCode, 
+    password, 
+    notifications } = req.body;
 
   try {
     // Check if the user already exists
@@ -187,8 +195,5 @@ app.put('/api/projects/:id', async (req, res) => {
   }
 });
 
-// ---------------------------------------------
-// Start the server
-// ---------------------------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
