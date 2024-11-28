@@ -37,6 +37,8 @@ interface FormErrors {
   password?: string; // Add password field
 }
 
+export default {
+  setup() {
 const router = useRouter();
 const { isAuthenticated } = useAuth();
 
@@ -119,8 +121,6 @@ const handleSubmit = async (event: Event): Promise<void> => {
   }
 };
 
-export default {
-  setup() {
     return {
       form,
       errors,
@@ -356,11 +356,11 @@ export default {
             </div>
           </div>
 
-          <div class="mt-8 flex justify-center">
+          <div class="mt-8 flex justify-center gap-x-4">
             <router-link to="/portal/homeview" class="inline-flex justify-center rounded-md border border-transparent bg-gray-600 px-6 py-3 text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm md-2" role="menuitem">Cancel</router-link>
             <button
               type="submit"
-              class="inline-flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
+              class="flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
               @submit.prevent="handleSubmit"
             >
               Register
