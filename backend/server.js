@@ -1,43 +1,41 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { expressjwt: jwt } = require('express-jwt');
+const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const bcrypt = require('bcrypt');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
 const User = require('./models/user.js').User;
 const app = express();  // Initialize Express app
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 // Middleware
 app.use(express.json());
 app.use(cors());  // Enable CORS for all routes
 
 // Auth0 configuration
-const authConfig = {
-  domain: process.env.AUTH0_DOMAIN || 'dev-lsauz5y1t0iz3nv2.us.auth0.com',
-  audience: process.env.AUTH0_AUDIENCE || 'https://creative-project-planner-api.com',
-};
-
-// Middleware to check JWTs
 const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://${authConfig.domain}/.well-known/jwks.json`
+    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
   }),
-  audience: authConfig.audience,
-  issuer: `https://${authConfig.domain}/`,
+  audience: process.env.AUTH0_AUDIENCE,
+  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
   algorithms: ['RS256']
 });
 
-// MongoDB Connection
-const mongoURI = 'mongodb+srv://iankatengeza:Kerrina%402002@creative-project-planne.besma.mongodb.net/creative-project-planner?retryWrites=true&w=majority';
-mongoose.connect(mongoURI)
-  .then(() => console.log('MongoDB connected...'))
-  .catch(err => console.error('MongoDB connection error:', err));
+
+// Load environment variables
+dotenv.config();
+
+// Connect to Database
+connectDB();
 
 
 // User Registration Route
@@ -153,6 +151,16 @@ app.post('/api/users/login', async (req, res) => {
 // Example protected route
 app.get('/api/protected', checkJwt, (req, res) => {
   res.send('This is a protected route, only accessible with a valid token');
+});
+
+// Error handling middleware for JWT authentication
+app.use((err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Invalid or expired token'
+    });
+  }
 });
 
 // Project Routes (CRUD)

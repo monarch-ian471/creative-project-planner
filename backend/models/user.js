@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
+  firstName: { type: String, required: true }, // Remove unique: true
   lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true }, // Keep unique on email
   phone: { type: String, required: true },
   country: { type: String, required: true },
   streetAddress: { type: String, required: true },
@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema({
     sms: { type: Boolean, default: false },
     email: { type: Boolean, default: false }
   }
+}, {
+  timestamps: true 
 });
 
 userSchema.pre('save', async function(next) {
