@@ -3,13 +3,15 @@ import { Auth0Client, RedirectLoginResult, createAuth0Client } from '@auth0/auth
 let auth0Client: Auth0Client | null = null;
 
 // Initialize the Auth0 client
-const initializeAuth0 = async (): Promise<void> => {
+const initializeAuth = async (): Promise<void> => {
   auth0Client = await createAuth0Client({
-    domain: 'dev-lsauz5y1t0iz3nv2.us.auth0.com',   // Auth0 Domain 
-    clientId: 'mUrgD8YKiUq92VHGeY1OGe7JElOYsrHv', // Auth0 Client ID 
+    domain: 'dev-lsauz5y1t0iz3nv2.us.auth0.com', // Auth0 Domain 
+    clientId: '48Jec1jqMeGthEIbTkDaEwFwoPOhRQwi', // Auth0 Client ID 
     authorizationParams: {
-      redirect_uri: window.location.origin // Redirect URI (usually your frontend's base URL)
-    }
+      redirect_uri: window.location.origin, // Redirect URI (usually your frontend's base URL)
+      audience: 'https://creative-project-planner-api.com', // API Identifier
+      scope: 'read:projects write:projects', // Scopes for API access
+    },
   });
 };
 
@@ -56,7 +58,7 @@ export const getUser = async (): Promise<any> => {
 export const logout = (): void => {
   if (auth0Client) {
     auth0Client.logout({
-      logoutParams: { returnTo: window.location.origin } // Redirect to this URL after logout
+      logoutParams: { returnTo: window.location.origin }, // Redirect to this URL after logout
     });
   } else {
     throw new Error('Auth0 client has not been initialized');
@@ -64,4 +66,4 @@ export const logout = (): void => {
 };
 
 // Initialize the Auth0 client (alias)
-export const initializeAuth = initializeAuth0;
+export const initializeAuth0 = initializeAuth;

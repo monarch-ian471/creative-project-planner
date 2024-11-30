@@ -12,7 +12,7 @@ const connectDB = async () => {
     // Drop the unique index on firstName if it exists
     try {
       await mongoose.connection.db.collection('users').dropIndex('firstName_1');
-      console.log('Dropped unique index on firstName');
+      // console.log('Dropped unique index on firstName');
     } catch (indexDropError) {
       console.log('No existing firstName index to drop');
     }
@@ -21,7 +21,7 @@ const connectDB = async () => {
     await mongoose.connection.db.collection('users').createIndex({ email: 1 }, { unique: true });
     await mongoose.connection.db.collection('users').createIndex({ firstName: 1 });
 
-    console.log('Indexes recreated successfully');
+    // console.log('Indexes recreated successfully');
 
   } catch (error) {
     console.error('MongoDB Connection Error:', error);

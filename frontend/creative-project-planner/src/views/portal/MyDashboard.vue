@@ -7,38 +7,31 @@ import {
   addProject, 
   addTask 
 } from '@/services/projectService';
-import GanttChart from 'vue-ganttastic';
-import { Calendar } from '@fullcalendar/core';
+import { CalendarOptions } from '@fullcalendar/core'
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { initializeAuth0 } from '@/views/auth/auth0';
 
 // Define interfaces for type safety
 interface Project {
-  _id: string;
-  id?: string;
-  name: string;
+  _id?: string;
   title: string;
   description: string;
-  status: string;
-  end_date: string;
   dueDate: Date;
 }
 
 interface Task {
-  _id: string;
-  id?: string;
+  _id?: string;
   name: string;
-  title?: string;
-  project: string;
-  status?: string;
-  due_date?: string;
   completed: boolean;
+  project?: string;
 }
 
 export default defineComponent({
   name: 'MyDashboard',
   components: {
-    GanttChart,
     FullCalendar,
   },
   setup() {
@@ -47,96 +40,92 @@ export default defineComponent({
     // Typed state variables
     const projects = ref<Project[]>([]);
     const tasks = ref<Task[]>([]);
-
-    // Modify the type for ganttData to make label non-optional
-    const ganttData = ref<Array<{
-      id: string;
-      label: string;
-      startsAt: Date;
-      endsAt: Date;
-      project: string;
-    }>>([]);
-
-    // Modify the type for calendarEvents to make title non-optional
-    const calendarEvents = ref<Array<{
-      title: string;
-      start?: Date;
-      end?: Date;
-    }>>([]);
     
     const userPreferences = reactive({
       showCalendar: true,
-      showGantt: true,
     });
 
     // Typed form data for new project and task
-    const newProject = reactive<Omit<Project, '_id' | 'id' | 'name' | 'status' | 'end_date'>>({
+    const newProject = reactive<{
+      title: string;
+      description: string;
+      dueDate: Date;
+    }>({
       title: '',
       description: '',
       dueDate: new Date(),
     });
 
-    const newTask = reactive<Partial<Omit<Task, '_id' | 'id'>>>({
+    const newTask = reactive<{
+      name: string;
+      completed: boolean;
+      project?: string;
+    }>({
       name: '',
-      project: '',
       completed: false,
+      project: '',
     });
 
-
-    const calendarOptions = ref<any>({
-      plugins: [dayGridPlugin],
+    // Calendar options
+    const calendarOptions = ref<CalendarOptions>({
+      plugins: [
+        dayGridPlugin, 
+        timeGridPlugin, 
+        interactionPlugin,
+      ],
       initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      editable: true,
+      selectable: true,
+      selectMirror: true,
+      dayMaxEvents: true,
       events: [],
     });
 
     // Fetch projects and tasks
-    // Modify the fetchData method to ensure type compatibility
-const fetchData = async () => {
-  try {
-    const fetchedProjects = await getProjects();
-    const fetchedTasks = await getTasks();
-    
-    projects.value = fetchedProjects as Project[];
-    tasks.value = fetchedTasks as Task[];
+    const fetchData = async () => {
+      try {
+        const fetchedProjects = await getProjects();
+        const fetchedTasks = await getTasks();
+        
+        projects.value = fetchedProjects;
+        tasks.value = fetchedTasks;
 
-    // Prepare Gantt data with non-optional label and title
-    ganttData.value = tasks.value.map((task) => ({
-      id: task._id || task.id || '',
-      label: task.name || task.title || 'Unnamed Task', // Provide a default string
-      startsAt: new Date(), 
-      endsAt: new Date(), 
-      project: task.project,
-    }));
+        // Update calendar events
+        const calendarEventsList = tasks.value.map((task) => ({
+          title: task.name || 'Unnamed Task',
+          start: new Date(), // Placeholder - adjust based on your actual data model
+          end: new Date(),
+          allDay: true
+        }));
 
-    // Prepare Calendar events with non-optional title
-    calendarEvents.value = tasks.value.map((task) => ({
-      title: task.name || task.title || 'Unnamed Event', // Provide a default string
-      start: task.due_date ? new Date(task.due_date) : undefined,
-      end: task.due_date ? new Date(task.due_date) : undefined,
-    }));
-
-    // Update calendar options
-    calendarOptions.value = {
-      ...calendarOptions.value,
-      events: calendarEvents.value,
+        calendarOptions.value = {
+          ...calendarOptions.value,
+          events: calendarEventsList
+        };
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        projects.value = [];
+        tasks.value = [];
+      }
     };
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    ganttData.value = [];
-    calendarEvents.value = [];
-  }
-};
 
     // Create a new project
     const createProject = async () => {
       try {
-        const project = await addProject({
+        await initializeAuth0();
+
+        await addProject({
           title: newProject.title,
           description: newProject.description,
           dueDate: newProject.dueDate
         });
         
-        // Reset form and refresh data
+        // Reset form
         newProject.title = '';
         newProject.description = '';
         newProject.dueDate = new Date();
@@ -148,23 +137,21 @@ const fetchData = async () => {
       }
     };
 
+    // Create a new task
     const createTask = async () => {
       try {
-        const task = await addTask({
-          name: newTask.name || 'New Task',
-          // title: newTask.name || 'New Task',
+        await initializeAuth0();
+
+        await addTask({
+          name: newTask.name,
           completed: newTask.completed,
-          project: newTask.project,
-          // status: newTask.status || 'pending',
-          // due_date: new Date().toISOString()
+          project: newTask.project
         });
         
-        // Reset form and refresh data
+        // Reset form
+        newTask.name = '';
         newTask.completed = false;
         newTask.project = '';
-        newTask.name = '';
-        newTask.title = '';
-        newTask.status = 'pending';
         
         // Refresh tasks list
         await fetchData();
@@ -173,13 +160,13 @@ const fetchData = async () => {
       }
     };
 
-    // Initial data fetch
-    onMounted(fetchData);
-
-    // Watch for calendar event updates
-    watch(calendarEvents, (newEvents) => {
-      if (calendarOptions.value) {
-        calendarOptions.value.events = newEvents;
+    // Initialize data when component is mounted
+    onMounted(async () => {
+      try {
+        await initializeAuth0();
+        await fetchData();
+      } catch (error) {
+        console.error('Initialization or data fetch error:', error);
       }
     });
 
@@ -195,8 +182,6 @@ const fetchData = async () => {
     return {
       projects,
       tasks,
-      ganttData,
-      calendarEvents,
       userPreferences,
       calendarOptions,
       newProject,
@@ -211,174 +196,155 @@ const fetchData = async () => {
 </script>
 
 <template>
-    <div class="container mx-auto p-4">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Your Dashboard</h1>
-
-    <!-- Project Creation Form -->
-    <div class="mb-6 bg-white rounded shadow-md p-4">
-      <h2 class="text-xl font-bold mb-4">Create New Project</h2>
-      <form @submit.prevent="createProject" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Project Title</label>
-          <input 
-            v-model="newProject.title" 
-            type="text" 
-            required 
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Description</label>
-          <input 
-            v-model="newProject.description" 
-            type="text" 
-            required 
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Due Date</label>
-          <input 
-            v-model="newProject.dueDate" 
-            type="date" 
-            required 
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-        </div>
-        <div class="md:col-span-3">
+  <div class="min-h-screen bg-gray-50 p-6">
+    <div class="container mx-auto">
+      <!-- Header Section -->
+      <header class="mb-8 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">Project Dashboard</h1>
+        <div class="flex space-x-4">
           <button 
-            type="submit" 
-            class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+            @click="goToSettings" 
+            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
           >
-            Create Project
+            Settings
           </button>
         </div>
-      </form>
-    </div>
+      </header>
 
-    <!-- Task Creation Form -->
-    <div class="mb-6 bg-white rounded shadow-md p-4">
-      <h2 class="text-xl font-bold mb-4">Create New Task</h2>
-      <form @submit.prevent="createTask" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Task Name</label>
-          <input 
-              v-model="newTask.name"
-              type="text" 
-              required 
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- New Project Form -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Create New Project</h2>
+          <form @submit.prevent="createProject" class="space-y-4">
+            <input 
+              v-model="newProject.title" 
+              placeholder="Project Title" 
+              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <textarea 
+              v-model="newProject.description" 
+              placeholder="Project Description" 
+              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="3"
+            ></textarea>
+            <input 
+              type="date" 
+              :value="newProject.dueDate.toISOString().split('T')[0]"
+              @input="newProject.dueDate = new Date(($event.target as HTMLInputElement).value)"
+              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              type="submit" 
+              class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
             >
+              Create Project
+            </button>
+          </form>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Project</label>
-          <select 
-            v-model="newTask.project" 
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-            <option value="">Select a Project</option>
-            <option v-for="project in projects" :key="project._id" :value="project._id">
-              {{ project.title }}
-            </option>
-          </select>
-        </div>
-        <div class="flex items-center">
-          <input 
-            v-model="newTask.completed" 
-            type="checkbox" 
-            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-          <label class="ml-2 text-sm font-medium text-gray-700">Completed</label>
-        </div>
-        <div class="md:col-span-3">
-          <button 
-            type="submit" 
-            class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
-          >
-            Create Task
-          </button>
-        </div>
-      </form>
-    </div>
 
-    
-    <div class="mb-6">
-      <button @click="goToSettings" class="bg-gray-800 text-white px-4 py-2 rounded">
-        Personalize Dashboard
-      </button>
-    </div>
-
-    
-    <div v-if="projects.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-      <div
-        v-for="project in projects"
-        :key="project.id"
-        class="bg-white rounded shadow-md p-4 border hover:shadow-lg transition-shadow"
-      >
-        <h2 class="text-lg font-bold">{{ project.name }}</h2>
-        <p>Status: {{ project.status }}</p>
-        <p>Due: {{ project.end_date }}</p>
-        <button @click="goToProject(project._id)" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
-          View Details
-        </button>
-      </div>
-    </div>
-    <div v-else class="text-center text-gray-500">No projects available.</div>
-
-    
-    <div v-if="userPreferences.showCalendar && calendarOptions" class="mb-6">
-      <h2 class="text-xl font-bold mb-4">Calendar</h2>
-      <FullCalendar v-bind="calendarOptions" />
-    </div>
-
-    
-    <div v-if="userPreferences.showGantt && ganttData.length > 0" class="mb-6">
-      <h2 class="text-xl font-bold mb-4">Gantt Timeline</h2>
-      <GanttChart
-        :rows="ganttData"
-        :columns="['label', 'startsAt', 'endsAt']"
-        :columnHeaderStyle="{ color: '#4a4a4a', fontWeight: 'bold' }"
-      />
-    </div>
-
-    
-    <div v-if="tasks.length > 0" class="mb-6">
-      <h2 class="text-xl font-bold mb-4">Tasks</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="task in tasks"
-          :key="task.id"
-          class="bg-white rounded shadow-md p-4 border"
-        >
-          <h3 class="text-lg font-bold">{{ task.title }}</h3>
-          <p>Status: {{ task.status }}</p>
-          <p>Due: {{ task.due_date }}</p>
+        <!-- New Task Form -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Create New Task</h2>
+          <form @submit.prevent="createTask" class="space-y-4">
+            <input 
+              v-model="newTask.name" 
+              placeholder="Task Name" 
+              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <select 
+              v-model="newTask.project" 
+              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Project</option>
+              <option 
+                v-for="project in projects" 
+                :key="project._id" 
+                :value="project._id"
+              >
+                {{ project.title }}
+              </option>
+            </select>
+            <div class="flex items-center">
+              <input 
+                type="checkbox" 
+                v-model="newTask.completed" 
+                class="mr-2"
+              />
+              <label>Completed</label>
+            </div>
+            <button 
+              type="submit" 
+              class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Create Task
+            </button>
+          </form>
         </div>
       </div>
+
+      <!-- Projects and Tasks Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Projects List -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Projects</h2>
+          <div v-if="projects.length === 0" class="text-gray-500 text-center">
+            No projects found
+          </div>
+          <ul v-else class="space-y-2">
+            <li 
+              v-for="project in projects" 
+              :key="project._id" 
+              class="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              @click="goToProject(project._id || '')"
+            >
+              <span class="font-medium">{{ project.title }}</span>
+              <span class="text-sm text-gray-500">
+                Due: {{ project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'No due date' }}
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Tasks List -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Tasks</h2>
+          <div v-if="tasks.length === 0" class="text-gray-500 text-center">
+            No tasks found
+          </div>
+          <ul v-else class="space-y-2">
+            <li 
+              v-for="task in tasks" 
+              :key="task._id" 
+              class="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <span 
+                :class="[
+                  'font-medium',
+                  task.completed ? 'line-through text-gray-500' : 'text-gray-800'
+                ]"
+              >
+                {{ task.name }}
+              </span>
+              <span class="text-sm text-gray-500">
+                {{ task.completed ? 'Completed' : 'Pending' }}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Calendar View -->
+      <div v-if="userPreferences.showCalendar" class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Calendar View</h2>
+        <FullCalendar 
+          :options="calendarOptions" 
+          class="bg-white shadow-md rounded-lg p-4"
+        />
+      </div>
     </div>
-    <div v-else class="text-center text-gray-500">No tasks available.</div>
   </div>
 </template>
 
-
-<!-- <div class="container mx-auto p-4">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Your Dashboard</h1>
-
-<!-- <template>
-    <div class="text-center">
-      <svg class="mx-auto size-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-      </svg>
-      <h3 class="mt-2 text-sm font-semibold text-gray-900">No projects</h3>
-      <p class="mt-1 text-sm text-gray-500">Get started by creating a new project.</p>
-      <div class="mt-6">
-        <button type="button" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          <PlusIcon class="-ml-0.5 mr-1.5 size-5" aria-hidden="true" />
-          New Project
-        </button>
-      </div>
-    </div>
-  </template>
-  
-  <script setup>
-  import { PlusIcon } from '@heroicons/vue/20/solid'
-  </script> -->

@@ -9,7 +9,6 @@ const routes = [
       name: 'UserRegister',
       component: () => import('@/views/auth/userRegister.vue')
     }, 
-    
   ]
   
   export {routes}

@@ -3,6 +3,8 @@ import store from './store'
 import { createApp } from 'vue';
 import App from '@/App.vue';
 import router from '@/router';
+// import { initializeAuth } from '@/views/auth/auth0';
+
 
 
 // Wrapping the Auth0 initialization in an async function
@@ -10,6 +12,8 @@ async function initializeApp(): Promise<void> {
   try {
     // Commenting Auth0 initialization temporarily to test the app rendering
     // await initializeAuth();
+    // async function initApp() {
+    //   await initializeAuth();
 
     // Initialize Vue application
     const app = createApp(App);
