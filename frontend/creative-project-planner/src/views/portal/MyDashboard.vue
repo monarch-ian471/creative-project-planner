@@ -1,10 +1,39 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { getProjects, getTasks } from '@/services/projectService';
+import { 
+  getProjects, 
+  getTasks, 
+  addProject, 
+  addTask 
+} from '@/services/projectService';
 import GanttChart from 'vue-ganttastic';
+import { Calendar } from '@fullcalendar/core';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
+
+// Define interfaces for type safety
+interface Project {
+  _id: string;
+  id?: string;
+  name: string;
+  title: string;
+  description: string;
+  status: string;
+  end_date: string;
+  dueDate: Date;
+}
+
+interface Task {
+  _id: string;
+  id?: string;
+  name: string;
+  title?: string;
+  project: string;
+  status?: string;
+  due_date?: string;
+  completed: boolean;
+}
 
 export default defineComponent({
   name: 'MyDashboard',
@@ -15,48 +44,132 @@ export default defineComponent({
   setup() {
     const router = useRouter();
 
-    // State variables
-    const projects = ref([]);
-    const tasks = ref([]);
-    const ganttData = ref([]);
-    const calendarEvents = ref([]);
+    // Typed state variables
+    const projects = ref<Project[]>([]);
+    const tasks = ref<Task[]>([]);
+
+    // Modify the type for ganttData to make label non-optional
+    const ganttData = ref<Array<{
+      id: string;
+      label: string;
+      startsAt: Date;
+      endsAt: Date;
+      project: string;
+    }>>([]);
+
+    // Modify the type for calendarEvents to make title non-optional
+    const calendarEvents = ref<Array<{
+      title: string;
+      start?: Date;
+      end?: Date;
+    }>>([]);
+    
     const userPreferences = reactive({
       showCalendar: true,
       showGantt: true,
     });
 
-    const calendarOptions = ref({});
+    // Typed form data for new project and task
+    const newProject = reactive<Omit<Project, '_id' | 'id' | 'name' | 'status' | 'end_date'>>({
+      title: '',
+      description: '',
+      dueDate: new Date(),
+    });
+
+    const newTask = reactive<Partial<Omit<Task, '_id' | 'id'>>>({
+      name: '',
+      project: '',
+      completed: false,
+    });
+
+
+    const calendarOptions = ref<any>({
+      plugins: [dayGridPlugin],
+      initialView: 'dayGridMonth',
+      events: [],
+    });
 
     // Fetch projects and tasks
-    const fetchData = async () => {
+    // Modify the fetchData method to ensure type compatibility
+const fetchData = async () => {
+  try {
+    const fetchedProjects = await getProjects();
+    const fetchedTasks = await getTasks();
+    
+    projects.value = fetchedProjects as Project[];
+    tasks.value = fetchedTasks as Task[];
+
+    // Prepare Gantt data with non-optional label and title
+    ganttData.value = tasks.value.map((task) => ({
+      id: task._id || task.id || '',
+      label: task.name || task.title || 'Unnamed Task', // Provide a default string
+      startsAt: new Date(), 
+      endsAt: new Date(), 
+      project: task.project,
+    }));
+
+    // Prepare Calendar events with non-optional title
+    calendarEvents.value = tasks.value.map((task) => ({
+      title: task.name || task.title || 'Unnamed Event', // Provide a default string
+      start: task.due_date ? new Date(task.due_date) : undefined,
+      end: task.due_date ? new Date(task.due_date) : undefined,
+    }));
+
+    // Update calendar options
+    calendarOptions.value = {
+      ...calendarOptions.value,
+      events: calendarEvents.value,
+    };
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    ganttData.value = [];
+    calendarEvents.value = [];
+  }
+};
+
+    // Create a new project
+    const createProject = async () => {
       try {
-        projects.value = (await getProjects()) || [];
-        tasks.value = (await getTasks()) || [];
-
-        // Prepare Gantt data
-        ganttData.value = tasks.value.map((task) => ({
-          id: task.id,
-          label: task.title,
-          startsAt: new Date(task.start_date || Date.now()),
-          endsAt: new Date(task.due_date || Date.now()),
-          project: task.project_id,
-        }));
-
-        // Prepare Calendar events
-        calendarEvents.value = tasks.value.map((task) => ({
-          title: task.title,
-          start: task.start_date,
-          end: task.due_date,
-        }));
-
-        // Initialize calendar options
-        calendarOptions.value = {
-          plugins: [dayGridPlugin],
-          initialView: 'dayGridMonth',
-          events: calendarEvents.value,
-        };
+        const project = await addProject({
+          title: newProject.title,
+          description: newProject.description,
+          dueDate: newProject.dueDate
+        });
+        
+        // Reset form and refresh data
+        newProject.title = '';
+        newProject.description = '';
+        newProject.dueDate = new Date();
+        
+        // Refresh projects list
+        await fetchData();
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error creating project:', error);
+      }
+    };
+
+    const createTask = async () => {
+      try {
+        const task = await addTask({
+          name: newTask.name || 'New Task',
+          // title: newTask.name || 'New Task',
+          completed: newTask.completed,
+          project: newTask.project,
+          // status: newTask.status || 'pending',
+          // due_date: new Date().toISOString()
+        });
+        
+        // Reset form and refresh data
+        newTask.completed = false;
+        newTask.project = '';
+        newTask.name = '';
+        newTask.title = '';
+        newTask.status = 'pending';
+        
+        // Refresh tasks list
+        await fetchData();
+      } catch (error) {
+        console.error('Error creating task:', error);
       }
     };
 
@@ -70,7 +183,7 @@ export default defineComponent({
       }
     });
 
-    // Navigate to settings page
+    // Navigation methods
     const goToSettings = () => {
       router.push('/portal/settings');
     };
@@ -86,25 +199,115 @@ export default defineComponent({
       calendarEvents,
       userPreferences,
       calendarOptions,
+      newProject,
+      newTask,
       goToSettings,
       goToProject,
+      createProject,
+      createTask,
     };
   },
 });
 </script>
 
 <template>
-  <div class="container mx-auto p-4">
+    <div class="container mx-auto p-4">
     <h1 class="text-4xl font-bold mb-4">Welcome to Your Dashboard</h1>
 
-    <!-- Settings Navigation -->
+    <!-- Project Creation Form -->
+    <div class="mb-6 bg-white rounded shadow-md p-4">
+      <h2 class="text-xl font-bold mb-4">Create New Project</h2>
+      <form @submit.prevent="createProject" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Project Title</label>
+          <input 
+            v-model="newProject.title" 
+            type="text" 
+            required 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Description</label>
+          <input 
+            v-model="newProject.description" 
+            type="text" 
+            required 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Due Date</label>
+          <input 
+            v-model="newProject.dueDate" 
+            type="date" 
+            required 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+        </div>
+        <div class="md:col-span-3">
+          <button 
+            type="submit" 
+            class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+          >
+            Create Project
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Task Creation Form -->
+    <div class="mb-6 bg-white rounded shadow-md p-4">
+      <h2 class="text-xl font-bold mb-4">Create New Task</h2>
+      <form @submit.prevent="createTask" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Task Name</label>
+          <input 
+              v-model="newTask.name"
+              type="text" 
+              required 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Project</label>
+          <select 
+            v-model="newTask.project" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+            <option value="">Select a Project</option>
+            <option v-for="project in projects" :key="project._id" :value="project._id">
+              {{ project.title }}
+            </option>
+          </select>
+        </div>
+        <div class="flex items-center">
+          <input 
+            v-model="newTask.completed" 
+            type="checkbox" 
+            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+          <label class="ml-2 text-sm font-medium text-gray-700">Completed</label>
+        </div>
+        <div class="md:col-span-3">
+          <button 
+            type="submit" 
+            class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+          >
+            Create Task
+          </button>
+        </div>
+      </form>
+    </div>
+
+    
     <div class="mb-6">
       <button @click="goToSettings" class="bg-gray-800 text-white px-4 py-2 rounded">
         Personalize Dashboard
       </button>
     </div>
 
-    <!-- Compact Cards for Projects -->
+    
     <div v-if="projects.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
       <div
         v-for="project in projects"
@@ -114,20 +317,20 @@ export default defineComponent({
         <h2 class="text-lg font-bold">{{ project.name }}</h2>
         <p>Status: {{ project.status }}</p>
         <p>Due: {{ project.end_date }}</p>
-        <button @click="goToProject(project.id)" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
+        <button @click="goToProject(project._id)" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
           View Details
         </button>
       </div>
     </div>
     <div v-else class="text-center text-gray-500">No projects available.</div>
 
-    <!-- Optional Calendar -->
+    
     <div v-if="userPreferences.showCalendar && calendarOptions" class="mb-6">
       <h2 class="text-xl font-bold mb-4">Calendar</h2>
       <FullCalendar v-bind="calendarOptions" />
     </div>
 
-    <!-- Gantt Timeline -->
+    
     <div v-if="userPreferences.showGantt && ganttData.length > 0" class="mb-6">
       <h2 class="text-xl font-bold mb-4">Gantt Timeline</h2>
       <GanttChart
@@ -137,7 +340,7 @@ export default defineComponent({
       />
     </div>
 
-    <!-- Task Management -->
+    
     <div v-if="tasks.length > 0" class="mb-6">
       <h2 class="text-xl font-bold mb-4">Tasks</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -153,8 +356,12 @@ export default defineComponent({
       </div>
     </div>
     <div v-else class="text-center text-gray-500">No tasks available.</div>
-    </div>
+  </div>
 </template>
+
+
+<!-- <div class="container mx-auto p-4">
+    <h1 class="text-4xl font-bold mb-4">Welcome to Your Dashboard</h1>
 
 <!-- <template>
     <div class="text-center">
