@@ -10,6 +10,7 @@ const connectDB = require('./config/db');
 const User = require('./models/user.js').User;
 const app = express();
 const bodyParser = require('body-parser');
+const userRoutes = require('./routes/users');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -143,6 +144,11 @@ app.post('/api/users/login', async (req, res) => {
       res.status(500).json({ message: 'Server error' });
   }
 });
+// Serve static files for profile pictures
+app.use('/uploads', express.static('uploads'));
+
+
+app.use('/api/users', userRoutes);
 
 // Example protected route
 app.get('/api/protected', checkJwt, (req, res) => {
@@ -160,7 +166,7 @@ app.use((err, req, res, next) => {
 });
 
 // Project Routes (CRUD)
-const Project = require('./models/Project'); // Import the Project model
+const Project = require('./models/project.js'); // Import the Project model
 
 // Create a new project
 app.post('/api/projects', async (req, res) => {

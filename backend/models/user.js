@@ -40,21 +40,16 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  }, profilePicture: {
+    type: String,
+    default: '/uploads/profile-pictures/default-avatar.png'
   },
 }, {
-  // Add indexing options at the schema level
+
   indexes: [
     // Ensure a non-null index for firstName if needed
     { firstName: 1 },
   ]
 });
-
-// userSchema.pre('save', async function(next) {
-//   if (this.isModified('password')) {
-//     this.password = await bcrypt.hash(this.password, 10);
-//   }
-//   next();
-// });
-
 const User = mongoose.model('User', userSchema);
 module.exports = { User };

@@ -15,6 +15,19 @@ const initializeAuth = async (): Promise<void> => {
   });
 };
 
+export const getTokenSilently = async (): Promise<string> => {
+  if (!auth0Client) {
+    throw new Error('Auth0 client has not been initialized');
+  }
+  
+  try {
+    return await auth0Client.getTokenSilently();
+  } catch (error) {
+    console.error('Error getting token silently:', error);
+    throw error;
+  }
+};
+
 // Get the Auth0 client
 export const getAuth0Client = (): Auth0Client | null => auth0Client;
 

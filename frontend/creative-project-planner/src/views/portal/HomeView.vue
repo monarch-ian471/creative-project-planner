@@ -59,7 +59,7 @@ export default defineComponent({
       { id: 1, name: 'Creators on the platform', value: '0.1+' },
       { id: 2, name: 'Flat platform fee', value: '0%' },
       { id: 3, name: 'Uptime guarantee', value: '99.9%' },
-      { id: 4, name: 'Paid out to creators', value: '8,000+' },
+      { id: 4, name: 'Paid out to creators', value: '0,001+' },
     ];
 
     const toggleFaq = (index: number) => {

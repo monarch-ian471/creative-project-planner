@@ -1,36 +1,40 @@
-import './assets/tailwind.css'; // Ensure this path is correct
+import './assets/tailwind.css'
 import store from './store'
-import { createApp } from 'vue';
-import App from '@/App.vue';
-import router from '@/router';
-// import { initializeAuth } from '@/views/auth/auth0';
+import { createApp } from 'vue'
+import App from '@/App.vue'
+import router from '@/router'
+import { createAuth0 } from '@auth0/auth0-vue'
 
-
-
-// Wrapping the Auth0 initialization in an async function
 async function initializeApp(): Promise<void> {
   try {
-    // Commenting Auth0 initialization temporarily to test the app rendering
-    // await initializeAuth();
-    // async function initApp() {
-    //   await initializeAuth();
-
-    // Initialize Vue application
-    const app = createApp(App);
+    // Create Vue app
+    const app = createApp(App)
 
     // Use router
-    app.use(router);
+    app.use(router)
+
+    // Use Auth0
+    app.use(
+      createAuth0({
+        domain: "dev-lsauz5y1t0iz3nv2.us.auth0.com",
+        clientId: "48Jec1jqMeGthEIbTkDaEwFwoPOhRQwi",
+        authorizationParams: {
+          redirect_uri: window.location.origin,
+          audience: 'https://creative-project-planner-api.com',
+          scope: 'read:projects write:projects'
+        }
+      })
+    )
 
     // Mount the Vue app
-    app.mount('#app');
+    app.mount('#app')
 
-    console.log('App is starting successfully without Auth0 initialization.');
+    console.log('App is starting successfully with Auth0 initialization.')
   } catch (error) {
-    // Handle initialization error
-    console.error('Error during app initialization:', error);
-    alert('There was an error initializing the app. Please try again later.');
+    console.error('Error during app initialization:', error)
+    alert('There was an error initializing the app. Please try again later.')
   }
 }
 
 // Start the initialization process
-initializeApp();
+initializeApp()

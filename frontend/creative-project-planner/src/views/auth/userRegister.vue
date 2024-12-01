@@ -156,7 +156,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     id="first-name"
                     autocomplete="given-name"
                     v-model="form.firstName"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.firstName" class="text-red-500 text-sm">{{ errors.firstName }}</span>
                 </div>
@@ -173,7 +173,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     id="last-name"
                     autocomplete="family-name"
                     v-model="form.lastName"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.lastName" class="text-red-500 text-sm">{{ errors.lastName }}</span>
                 </div>
@@ -191,7 +191,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     type="email"
                     autocomplete="email"
                     v-model="form.email"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</span>
                 </div>
@@ -209,7 +209,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     type="password"
                     autocomplete="new-password"
                     v-model="form.password"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.password" class="text-red-500 text-sm">{{ errors.password }}</span>
                 </div>
@@ -227,7 +227,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                   type="tel"
                   autocomplete="tel"
                   v-model="form.phone"
-                  class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                  class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.phone" class="text-red-500 text-sm">{{ errors.phone }}</span>
                 </div>
@@ -243,7 +243,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     name="country"
                     autocomplete="country-name"
                     v-model="form.country"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   >
                     <option value="" disabled selected>Select your country</option>
                     <option value="Malawi">Malawi</option>
@@ -266,7 +266,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     name="streetAddress"
                     type="text"
                     v-model="form.streetAddress"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.streetAddress" class="text-red-500 text-sm">{{ errors.streetAddress }}</span>
                 </div>
@@ -282,7 +282,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     name="city"
                     type="text"
                     v-model="form.city"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.city" class="text-red-500 text-sm">{{ errors.city }}</span>
                 </div>
@@ -298,7 +298,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     name="region"
                     type="text"
                     v-model="form.region"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="blockw-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.region" class="text-red-500 text-sm">{{ errors.region }}</span>
                 </div>
@@ -314,7 +314,7 @@ const handleSubmit = async (event: Event): Promise<void> => {
                     name="postalCode"
                     type="text"
                     v-model="form.postalCode"
-                    class="block w-full rounded-md border-0 py-1.5 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
+                    class="block w-full px-3 py-2 rounded-md border-0 text-orange-900 shadow-sm ring-1 ring-inset ring-orange-300 placeholder:text-orange-400 focus:ring-2 focus:ring-inset focus:ring-custom-peach sm:text-sm sm:leading-6"
                   />
                   <span v-if="errors.postalCode" class="text-red-500 text-sm">{{ errors.postalCode }}</span>
                 </div>
