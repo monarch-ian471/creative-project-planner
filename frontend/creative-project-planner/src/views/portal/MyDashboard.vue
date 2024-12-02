@@ -302,7 +302,7 @@ export default defineComponent({
   <div class="min-h-screen bg-gray-50 p-6 rounded-lg border border-gray-800">
     <div class="container mx-auto">
 
-      <div class="bg-white shadow-md rounded-lg p-6 mb-8 border border-gray-300 flex items-center">
+      <div class="bg-white shadow-md rounded-lg p-6 mb-8 border border-gray-800 flex items-center">
           <div class="relative mr-6">
             <input 
               type="file" 
