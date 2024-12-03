@@ -11,7 +11,7 @@ export interface UserProfile {
   }
   
   export interface Project {
-    _id?: string;
+    _id: string;
     title: string;
     description: string;
     dueDate: Date; // Always ensure it's a Date object

@@ -3,6 +3,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia' // Add this import
 import App from '@/App.vue'
 import router from '@/router'
+import { Toaster } from 'vue-sonner'
 import { createAuth0 } from '@auth0/auth0-vue'
 
 async function initializeApp(): Promise<void> {
@@ -16,6 +17,12 @@ async function initializeApp(): Promise<void> {
     // Use Pinia
     app.use(pinia)
 
+    app.use(Toaster, {
+      // Optional configuration
+      position: 'top-right',
+      duration: 3000,
+      richColors: true
+    })
     // Use router
     app.use(router)
 

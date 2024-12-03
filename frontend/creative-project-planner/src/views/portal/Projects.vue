@@ -1,7 +1,7 @@
 <script>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import ProjectCard from '@/components/projectCard.vue';
+import ProjectCard from '@/views/projects/projectCard.vue';
 
 
 export default {

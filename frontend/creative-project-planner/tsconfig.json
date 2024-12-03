@@ -14,7 +14,9 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types",
+    "./src/types"
+  ],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
