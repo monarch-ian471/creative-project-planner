@@ -17,7 +17,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Middleware
 app.use(express.json());
-app.use(cors());  // Enable CORS for all routes
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Auth0 configuration
 const checkJwt = expressJwt({
@@ -169,7 +173,7 @@ app.use((err, req, res, next) => {
 const Project = require('./models/project.js'); // Import the Project model
 
 // Create a new project
-app.post('/api/projects', async (req, res) => {
+app.post('/api/projects', checkJwt, async (req, res) => {
   try {
     const newProject = new Project(req.body);  // Create a new project from the request body
     const savedProject = await newProject.save();  // Save project to database
@@ -180,7 +184,7 @@ app.post('/api/projects', async (req, res) => {
 });
 
 // Get all projects
-app.get('/api/projects', async (req, res) => {
+app.get('/api/projects', checkJwt, async (req, res) => {
   try {
     const projects = await Project.find();  // Fetch all projects from database
     res.json(projects);  // Respond with projects list
@@ -190,7 +194,7 @@ app.get('/api/projects', async (req, res) => {
 });
 
 // Get all projects
-app.get('/api/projects', async (req, res) => {
+app.get('/api/projects', checkJwt, async (req, res) => {
   try {
     const projects = await Project.find();
     res.json(projects);
@@ -201,7 +205,7 @@ app.get('/api/projects', async (req, res) => {
 
 
 // Get a single project by ID
-app.get('/api/projects/:id', async (req, res) => {
+app.get('/api/projects/:id',checkJwt,  async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);  // Fetch project by ID
     if (!project) return res.status(404).json({ message: 'Project not found' });  // Handle project not found
@@ -212,7 +216,7 @@ app.get('/api/projects/:id', async (req, res) => {
 });
 
 // Delete a project by ID
-app.delete('/api/projects/:id', async (req, res) => {
+app.delete('/api/projects/:id', checkJwt, async (req, res) => {
   try {
     const deletedProject = await Project.findByIdAndDelete(req.params.id);  // Delete project by ID
     if (!deletedProject) return res.status(404).json({ message: 'Project not found' });  // Handle project not found
@@ -223,7 +227,7 @@ app.delete('/api/projects/:id', async (req, res) => {
 });
 
 // Update a project by ID
-app.put('/api/projects/:id', async (req, res) => {
+app.put('/api/projects/:id', checkJwt, async (req, res) => {
   try {
     const updatedProject = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });  // Update project
     if (!updatedProject) return res.status(404).json({ message: 'Project not found' });  // Handle project not found

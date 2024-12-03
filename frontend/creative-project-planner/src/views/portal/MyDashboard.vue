@@ -83,11 +83,11 @@ export default defineComponent({
 
     // Navigation methods
     const openCreateProject = () => {
-      router.push('/portal/project/create');
+      router.push('/projects/create');
     };
 
     const openProjectDetail = (projectId: string) => {
-      router.push(`/portal/project/${projectId}`);
+      router.push(`/projects/${projectId}`);
     };
 
     // Rest of the existing user profile and initialization logic remains the same

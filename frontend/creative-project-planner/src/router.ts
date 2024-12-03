@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { routes as AdminRoutes } from '@/views/admin'
 import { routes as AuthRoutes } from '@/views/auth'
 import { routes as PortalRoutes } from '@/views/portal'
+import { routes as ProjectsRoutes } from '@/views/projects'
 
 
 const router = createRouter({
@@ -24,6 +25,10 @@ const router = createRouter({
     {
       path: '/portal',
       children: PortalRoutes,  // Ensure PortalRoutes are properly prefixed
+    },
+    {
+      path: '/projects',
+      children: ProjectsRoutes,  // Ensure PortalRoutes are properly prefixed
     },
   ]
 })

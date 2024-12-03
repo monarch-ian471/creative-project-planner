@@ -29,11 +29,11 @@ async function initializeApp(): Promise<void> {
     // Use Auth0
     app.use(
       createAuth0({
-        domain: "dev-lsauz5y1t0iz3nv2.us.auth0.com",
-        clientId: "48Jec1jqMeGthEIbTkDaEwFwoPOhRQwi",
+        domain: "https://dev-lsauz5y1t0iz3nv2.us.auth0.com/oauth/token",
+        clientId: "Z08tH8UDNQijeCdDklsHE5K9d7z2Q6Ay",
         authorizationParams: {
           redirect_uri: window.location.origin,
-          audience: 'https://creative-project-planner-api.com',
+          audience: 'https://creative-project-planner-api',
           scope: 'read:projects write:projects'
         }
       })

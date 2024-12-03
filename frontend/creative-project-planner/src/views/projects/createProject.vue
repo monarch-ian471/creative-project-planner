@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useProjectStore } from '@/store/projectStore';
 import ProjectForm from '@/views/projects/projectForm.vue';
 import { Project } from '@/types/index';

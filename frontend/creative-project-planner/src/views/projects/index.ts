@@ -1,27 +1,29 @@
 const routes = [
     {
-      path: '/portal/projects',
+      path: '/projects',
       name: 'projectList',
-      component: () => import('@/views/projects/projectList.vue')
+      component: () => import('@/views/projects/projectsList.vue')
     },
     {
-      path: '/portal/project/create',
+      path: '/projects/create',
       name: 'createProject',
-      component: () => import('@/components/project/projectForm.vue')
+      component: () => import('@/views/projects/createProject.vue')
     },
     {
-      path: '/portal/project/:id',
+      path: '/projects/:id',
       name: 'projectDetail',
       component: () => import('@/views/projects/projectDetail.vue')
     },
     {
-      path: '/portal/projectCard',
+      path: '/projects/projectCard',
       name: 'ProjectCard',
       component: () => import('@/views/projects/projectCard.vue')
     },
     {
-      path: '/portal/projectForm',
+      path: '/projects/projectForm',
       name: 'ProjectForm',
       component: () => import('@/views/projects/projectForm.vue')
     },
   ];
+
+  export {routes}
