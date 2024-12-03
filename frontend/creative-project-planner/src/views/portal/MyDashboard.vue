@@ -1,12 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  getProjects, 
-  getTasks, 
-  addProject, 
-  addTask 
-} from '@/services/projectService';
+import { useProjectStore } from '@/stores/projectStore';
 import { CalendarOptions } from '@fullcalendar/core'
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -51,6 +46,9 @@ export default defineComponent({
     FullCalendar,
   },
   setup() {
+
+    const projectStore = useProjectStore();
+
     const router = useRouter();
 
     // Typed state variables

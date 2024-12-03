@@ -1,132 +1,144 @@
-import axios, { AxiosResponse } from 'axios';
-import { getAuth0Client } from '@/views/auth/auth0';
+// src/services/projectService.ts
+import axios from 'axios';
+import { Project, Task } from '@/types';
+import { initializeAuth0, getTokenSilently } from '@/views/auth/auth0';
 
-const API_URL_PROJECTS = 'http://localhost:3000/api/projects'; // Projects API endpoint
-const API_URL_TASKS = 'http://localhost:3000/api/tasks'; // Tasks API endpoint
+const API_BASE_URL  = import.meta.env.VITE_API_BASE_URL;
 
-// Updated interfaces to match backend schema
-interface Project {
-  _id?: string; // Backend uses _id for MongoDB documents
-  title: string;
-  description: string;
-  dueDate: Date;
-  createdAt?: Date;
-}
+export const projectService = {
+  async getProjects(): Promise<Project[]> {
+    try {
+      await initializeAuth0();
+      const response = await axios.get(`${API_BASE_URL}/projects`, {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch projects', error);
+      throw error;
+    }
+  },
 
-interface Task {
-  _id?: string; // Backend uses _id for MongoDB documents
-  name: string;
-  completed: boolean;
-  project?: string; // Reference to project ID
-}
+  async getTasks(): Promise<Task[]> {
+    try {
+      await initializeAuth0();
+      const response = await axios.get(`${API_BASE_URL}/tasks`, {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch tasks', error);
+      throw error;
+    }
+  },
 
-// Get authorization headers
-const getAuthHeaders = async (): Promise<{ headers: { Authorization: string } }> => {
-  const auth0Client = await getAuth0Client();
-  if (!auth0Client) {
-    throw new Error('Auth0 client is not initialized');
-  }
-  const token = await auth0Client.getTokenSilently();
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+  async addProject(projectData: Omit<Project, '_id'>): Promise<Project> {
+    try {
+      await initializeAuth0();
+      const response = await axios.post(`${API_BASE_URL}/projects`, projectData, {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create project', error);
+      throw error;
+    }
+  },
 
-// Get all projects
-export const getProjects = async (): Promise<Project[]> => {
-  try {
-    const headers = await getAuthHeaders();
-    const response: AxiosResponse<Project[]> = await axios.get(API_URL_PROJECTS, headers);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    throw error;
-  }
-};
+  async addTask(taskData: Omit<Task, '_id'>): Promise<Task> {
+    try {
+      await initializeAuth0();
+      const response = await axios.post(`${API_BASE_URL}/tasks`, taskData, {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create task', error);
+      throw error;
+    }
+  },
 
-// Get all tasks
-export const getTasks = async (): Promise<Task[]> => {
-  try {
-    const headers = await getAuthHeaders();
-    const response: AxiosResponse<Task[]> = await axios.get(API_URL_TASKS, headers);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    throw error;
-  }
-};
+  async fetchUserProfile() {
+    try {
+      await initializeAuth0();
+      const response = await axios.get('/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data.profile;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
+  },
 
-// Create a new project
-export const addProject = async (projectData: {
-  title: string;
-  description: string;
-  dueDate: Date;
-}): Promise<Project> => {
-  try {
-    const headers = await getAuthHeaders();
-    const response: AxiosResponse<Project> = await axios.post(API_URL_PROJECTS, {
-      title: projectData.title,
-      description: projectData.description,
-      dueDate: projectData.dueDate
-    }, headers);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating project:', error);
-    throw error;
-  }
-};
+  async fetchUserStats() {
+    try {
+      const response = await axios.get('/api/users/stats', {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data.stats;
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      throw error;
+    }
+  },
 
-// Create a new task
-export const addTask = async (taskData: {
-  name: string;
-  completed?: boolean;
-  project?: string;
-}): Promise<Task> => {
-  try {
-    const headers = await getAuthHeaders();
-    const response: AxiosResponse<Task> = await axios.post(API_URL_TASKS, {
-      name: taskData.name,
-      completed: taskData.completed || false,
-      project: taskData.project
-    }, headers);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating task:', error);
-    throw error;
-  }
-};
+  async uploadProfilePicture(file: File) {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
 
-// Additional CRUD methods (you can expand these as needed)
-export const getProjectById = async (id: string): Promise<Project> => {
-  try {
-    const headers = await getAuthHeaders();
-    const response: AxiosResponse<Project> = await axios.get(`${API_URL_PROJECTS}/${id}`, headers);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching project by ID (${id}):`, error);
-    throw error;
-  }
-};
+    try {
+      const response = await axios.post('/api/users/profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data.profilePictureUrl;
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      throw error;
+    }
+  },
+  
+  async updateProject(projectId: string, projectData: Partial<Project>): Promise<Project> {
+    try {
+      await initializeAuth0();
+      const response = await axios.patch(`${API_BASE_URL}/projects/${projectId}`, projectData, {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to update project ${projectId}`, error);
+      throw error;
+    }
+  },
 
-export const updateProject = async (id: string, projectData: Partial<Project>): Promise<Project> => {
-  try {
-    const headers = await getAuthHeaders();
-    const response: AxiosResponse<Project> = await axios.put(`${API_URL_PROJECTS}/${id}`, projectData, headers);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating project by ID (${id}):`, error);
-    throw error;
-  }
-};
-
-export const deleteProject = async (id: string): Promise<void> => {
-  try {
-    const headers = await getAuthHeaders();
-    await axios.delete(`${API_URL_PROJECTS}/${id}`, headers);
-  } catch (error) {
-    console.error(`Error deleting project by ID (${id}):`, error);
-    throw error;
+  async deleteProject(projectId: string): Promise<void> {
+    try {
+      await initializeAuth0();
+      await axios.delete(`${API_BASE_URL}/projects/${projectId}`, {
+        headers: {
+          'Authorization': `Bearer ${await getTokenSilently()}`
+        }
+      });
+    } catch (error) {
+      console.error(`Failed to delete project ${projectId}`, error);
+      throw error;
+    }
   }
 };

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from '@/store'
+// import store from '@/store'
 
 import { routes as AdminRoutes } from '@/views/admin'
 import { routes as AuthRoutes } from '@/views/auth'
@@ -28,19 +28,19 @@ const router = createRouter({
   ]
 })
 
-// Navigation Guard
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.getters['auth/isAuthenticated']
+// // Navigation Guard
+// router.beforeEach((to, from, next) => {
+//   const isAuthenticated = store.getters['auth/isAuthenticated']
   
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirect to login if trying to access authenticated route
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (to.meta.requiresGuest && isAuthenticated) {
-    // Redirect to dashboard if authenticated user tries to access login
-    next({ name: 'Dashboard' })
-  } else {
-    next()
-  }
-})
+//   if (to.meta.requiresAuth && !isAuthenticated) {
+//     // Redirect to login if trying to access authenticated route
+//     next({ name: 'Login', query: { redirect: to.fullPath } })
+//   } else if (to.meta.requiresGuest && isAuthenticated) {
+//     // Redirect to dashboard if authenticated user tries to access login
+//     next({ name: 'Dashboard' })
+//   } else {
+//     next()
+//   }
+// })
 
 export default router

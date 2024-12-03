@@ -1,38 +1,34 @@
-<script>
+<script setup lang="ts">
+import { defineProps, defineEmits } from 'vue';
+import { Project } from '@/types';
+import { useRouter } from 'vue-router';
 
+const props = defineProps<{
+  project: Project;
+}>();
 
-export default {
-    name: 'ProjectCard',
-    props: {
-        project: {
-            type: Object,
-            required: true
-        }
-    },
-}
+defineEmits<{
+  (e: 'click', id?: string): void;
+}>();
+
+const formatDate = (date: Date) => {
+  return date ? new Date(date).toLocaleDateString() : 'No due date';
+};
 </script>
 
 <template>
-    <div class="max-w-sm rounded overflow-hidden shadow-lg p-4 bg-white">
-        <!-- Image placeholder -->
-        <img
-            class="w-full h-48 object-cover rounded-lg"
-            src="@/assets/featured-2.png"
-            alt="Project Image"
-        />
-        
-        <div class="font-bold text-xl my-4">{{ project.title }}</div>
-        <p class="text-gray-700 text-base">
-            {{ project.description }}
-        </p>
-
-        <div class="mt-4">
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-                {{ project.status }}
-            </span>
-            <button @click="changeStatus" class="bg-teal-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-300">
-                Change Status
-            </button>
-        </div>
+    <div 
+      class="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+      @click="$emit('click', project._id)"
+    >
+      <div class="flex flex-col">
+        <span class="font-medium text-gray-800">{{ project.title }}</span>
+        <span class="text-xs text-gray-500">
+          {{ project.description }}
+        </span>
+      </div>
+      <span class="text-sm text-gray-500">
+        Due: {{ formatDate(project.dueDate) }}
+      </span>
     </div>
-</template>
+  </template>
