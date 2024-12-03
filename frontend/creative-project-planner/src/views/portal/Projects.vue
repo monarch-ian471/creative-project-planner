@@ -1,9 +1,8 @@
 <script>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import ProjectCard from '@/components/ProjectCard.vue';
-import TaskList from '@/components/TaskList.vue';
-import CalendarCard from '@/components/CalendarCard.vue';
+import ProjectCard from '@/components/projectCard.vue';
+
 
 export default {
     name: 'UserProjects',

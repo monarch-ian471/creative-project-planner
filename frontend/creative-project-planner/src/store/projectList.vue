@@ -1,7 +1,8 @@
-<script setup lang="ts">
+<script setup lang ="ts">
 import { defineProps, defineEmits } from 'vue';
-import { Project } from '@/types';
+import { Project } from '@/types/index';
 import ProjectCard from '@/portal/project/projectCard.vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   projects: Project[];

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
-import { Project } from '@/types';
-import { useRouter } from 'vue-router';
+import { Project } from '@/types/index';
 
 const props = defineProps<{
   project: Project;
@@ -31,4 +30,4 @@ const formatDate = (date: Date) => {
         Due: {{ formatDate(project.dueDate) }}
       </span>
     </div>
-  </template>
+</template>

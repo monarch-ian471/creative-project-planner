@@ -62,9 +62,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useProjectStore } from '@/stores/projectStore';
-import { Project, Task } from '@/types';
-import ProjectForm from '@/components/projectForm.vue;
+import { useProjectStore } from '@/store/projectStore';
+import { Project, Task } from '@/types/index';
+import ProjectForm from '@/views/projects/projectForm.vue';
 
 const route = useRoute();
 const router = useRouter();

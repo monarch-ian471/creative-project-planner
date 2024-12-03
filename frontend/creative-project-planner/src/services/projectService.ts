@@ -1,6 +1,6 @@
 // src/services/projectService.ts
 import axios from 'axios';
-import { Project, Task } from '@/types';
+import { Project, Task } from '@/types/index';
 import { initializeAuth0, getTokenSilently } from '@/views/auth/auth0';
 
 const API_BASE_URL  = import.meta.env.VITE_API_BASE_URL;

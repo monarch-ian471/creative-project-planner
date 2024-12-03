@@ -1,43 +1,35 @@
-<template>
-    <div class="create-project-container">
-      <ProjectForm 
-        :isEditing="false"
-        @submit="handleCreateProject"
-      />
-    </div>
-  </template>
-  
-  <script setup lang="ts">
+<script setup lang="ts">
   import { useRouter } from 'vue-router';
-  import { useProjectStore } from '@/stores/projectStore';
-  import ProjectForm from '@/components/Project/ProjectForm.vue';
-  import { Project } from '@/types';
+  import { ref } from 'vue';
+  import { useProjectStore } from '@/store/projectStore';
+  import ProjectForm from '@/views/projects/projectForm.vue';
+  import { Project } from '@/types/index';
   
   const router = useRouter();
   const projectStore = useProjectStore();
+  const newProject = ref<Omit<Project, '_id'>>({
+    title: '',
+    description: '',
+    dueDate: new Date()
+  })
   
-  const handleCreateProject = async (projectData: Partial<Project>) => {
+  const handleCreateProject = async () => {
     try {
-      const newProject = await projectStore.addProject({
-        ...projectData,
-        status: 'active',
-        createdAt: new Date(),
-        dueDate: new Date(projectData.dueDate || Date.now())
-      });
-      
-      // Navigate to the new project's detail page
-      router.push(`/projects/${newProject._id}`);
+      // Use createProject method from the store
+      await projectStore.createProject(newProject.value)
+      // Additional logic like resetting form or navigating
     } catch (error) {
-      console.error('Project creation failed', error);
-      // Optionally show an error notification
+      // Handle error
+      console.error('Failed to create project', error)
     }
-  };
-  </script>
-  
-  <style scoped>
-  .create-project-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
   }
-  </style>
+</script>
+
+<template>
+  <div class="max-w-xl mx-auto px-4 py-5">
+    <ProjectForm 
+      :isEditing="false"
+      @submit="handleCreateProject"
+    />
+  </div>
+</template>

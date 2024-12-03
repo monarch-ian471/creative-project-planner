@@ -13,5 +13,15 @@ const routes = [
       path: '/portal/project/:id',
       name: 'projectDetail',
       component: () => import('@/views/projects/projectDetail.vue')
-    }
+    },
+    {
+      path: '/portal/projectCard',
+      name: 'ProjectCard',
+      component: () => import('@/views/projects/projectCard.vue')
+    },
+    {
+      path: '/portal/projectForm',
+      name: 'ProjectForm',
+      component: () => import('@/views/projects/projectForm.vue')
+    },
   ];

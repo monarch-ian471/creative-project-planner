@@ -33,7 +33,7 @@
   <script setup lang="ts">
   import { onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useProjectStore } from '@/stores/projectStore';
+  import { useProjectStore } from '@/store/projectStore';
   import ProjectCard from '@/components/Project/ProjectCard.vue';
   
   const projectStore = useProjectStore();

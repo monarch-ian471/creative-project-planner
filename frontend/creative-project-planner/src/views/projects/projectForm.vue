@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed } from 'vue';
-import { Project } from '@/types';
-import { useRouter } from 'vue-router';
+import { ref, defineProps, defineEmits } from 'vue';
+import { Project } from '@/types/index';
+
 
 const props = defineProps<{
   project?: Project;

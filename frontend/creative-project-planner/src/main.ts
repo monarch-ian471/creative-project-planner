@@ -1,6 +1,6 @@
 import './assets/tailwind.css'
-import store from './store'
 import { createApp } from 'vue'
+import { createPinia } from 'pinia' // Add this import
 import App from '@/App.vue'
 import router from '@/router'
 import { createAuth0 } from '@auth0/auth0-vue'
@@ -9,6 +9,12 @@ async function initializeApp(): Promise<void> {
   try {
     // Create Vue app
     const app = createApp(App)
+
+    // Create Pinia instance
+    const pinia = createPinia()
+
+    // Use Pinia
+    app.use(pinia)
 
     // Use router
     app.use(router)
