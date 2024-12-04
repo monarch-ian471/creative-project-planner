@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits, onMounted } from 'vue';
+import { toast } from 'vue-sonner';
 import { Project } from '@/types/index';
 
-
 const props = defineProps<{
-  project?: Project;
+  project?: Partial<Project>; // Use Partial to make all properties optional
   isEditing?: boolean;
 }>();
 
@@ -15,7 +15,12 @@ const emit = defineEmits<{
 const localProject = ref<Omit<Project, '_id'>>({
   title: props.project?.title || '',
   description: props.project?.description || '',
-  dueDate: props.project?.dueDate || new Date()
+  dueDate: props.project?.dueDate instanceof Date 
+    ? props.project.dueDate 
+    : props.project?.dueDate 
+      ? new Date(props.project.dueDate) 
+      : new Date(),
+  status: props.project?.status || 'pending'
 });
 
 const formatDate = (date: Date) => {
@@ -28,6 +33,14 @@ const updateDueDate = (event: Event) => {
 };
 
 const submitProject = () => {
+  // Validate the project before submitting
+  if (!localProject.value.title.trim()) {
+    // You might want to add some error handling or toast notification
+    toast.success('Project created successfully');
+
+    return;
+  }
+  
   emit('submit', localProject.value);
 };
 </script>
@@ -60,5 +73,3 @@ const submitProject = () => {
       </button>
     </form>
 </template>
-  
- 
