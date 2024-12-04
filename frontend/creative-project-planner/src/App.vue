@@ -52,7 +52,7 @@ export default defineComponent({
       }
     });
 
-    const logOut = () => {
+    const logIn = () => {
       router.push('/login');
     };
 
@@ -69,7 +69,7 @@ export default defineComponent({
       isUserMenuOpen,
       toggleMobileMenu,
       toggleUserMenu,
-      logOut,
+      logIn,
       routes,
     };
   }
@@ -148,8 +148,8 @@ export default defineComponent({
               </router-link>
             </li>
             <li>
-              <button @click="logOut" class="block w-full text-left px-4 py-2 rounded-md hover:bg-orange-200">
-                Logout
+              <button @click="logIn" class="block w-full text-left px-4 py-2 rounded-md hover:bg-orange-200">
+                Login
               </button>
             </li>
           </ul>

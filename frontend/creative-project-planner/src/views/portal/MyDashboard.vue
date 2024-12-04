@@ -92,16 +92,16 @@ export default defineComponent({
 
     // Rest of the existing user profile and initialization logic remains the same
     const userProfile = ref<UserProfile>({
-      firstName: '',
-      lastName: '',
-      email: '',
-      profilePicture: '/default-avatar.png'
+      firstName: 'Ian',
+      lastName: 'Katengeza',
+      email: 'iankatengeza@gmail.com',
+      profilePicture: '@/src/assets/me.png'
     });
 
     const profileStats = ref({
-      totalProjects: 0,
-      completedTasks: 0,
-      pendingTasks: 0
+      totalProjects: 6,
+      completedTasks: 3,
+      pendingTasks: 8
     });
 
     const profilePictureFile = ref<File | null>(null);

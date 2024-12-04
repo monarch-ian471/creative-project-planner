@@ -5,6 +5,9 @@ import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_AUTH0_DOMAIN': JSON.stringify(process.env.AUTH0_DOMAIN),
+  },
   plugins: [vue()],
   resolve: {
     alias: {

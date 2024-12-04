@@ -29,11 +29,11 @@ async function initializeApp(): Promise<void> {
     // Use Auth0
     app.use(
       createAuth0({
-        domain: "https://dev-lsauz5y1t0iz3nv2.us.auth0.com/oauth/token",
-        clientId: "Z08tH8UDNQijeCdDklsHE5K9d7z2Q6Ay",
+        domain: import.meta.env.VITE_AUTH0_DOMAIN,
+        clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
         authorizationParams: {
           redirect_uri: window.location.origin,
-          audience: 'https://creative-project-planner-api',
+          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
           scope: 'read:projects write:projects'
         }
       })
@@ -42,10 +42,10 @@ async function initializeApp(): Promise<void> {
     // Mount the Vue app
     app.mount('#app')
 
-    console.log('App is starting successfully with Auth0 initialization.')
+    console.log('App initialized successfully with Auth0.')
   } catch (error) {
-    console.error('Error during app initialization:', error)
-    alert('There was an error initializing the app. Please try again later.')
+    console.error('App initialization error:', error)
+    alert('Failed to initialize the application. Please try again.')
   }
 }
 

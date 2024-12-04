@@ -7,13 +7,13 @@ export default defineComponent({
     const isLoading = ref(false);
     const hasError = ref(false);
     const successMessage = ref('');
-    const userName = ref('John Doe');
-    const email = ref('johndoe@example.com');
+    const userName = ref('Ian Katengeza');
+    const email = ref('iankatengeza@gmail.com');
     const projectCount = ref(5);
-    const twitterHandle = ref('@johndoe');
-    const linkedInHandle = ref('linkedin.com/in/johndoe');
+    const twitterHandle = ref('@ian.iv.vii.');
+    const linkedInHandle = ref('linkedin.com/in/iankatengeza/');
     const profileBadge = ref('Pro Member'); // Badge indicator
-    const profilePicture = ref('https://via.placeholder.com/150');
+    const profilePicture = ref('frontend/creative-project-planner/src/assets/me.png');
 
 
     function updatePassword() {
@@ -108,7 +108,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="container mx-auto p-4 mt-6 bg-gradient-to-r from-gray-600 to-orange-400 rounded-xl shadow-lg">
+  <div class="container mx-auto p-4 mt-6 bg-black bg-opacity-70 rounded-xl shadow-lg">
     <div class="flex items-center space-x-4 mb-6">
       <!-- Profile Picture Update Icon with File Input -->
       <div class="relative w-24 h-24 bg-gray-200 rounded-full overflow-hidden">

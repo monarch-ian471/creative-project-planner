@@ -5,12 +5,12 @@ let auth0Client: Auth0Client | null = null;
 // Initialize the Auth0 client
 const initializeAuth = async (): Promise<void> => {
   auth0Client = await createAuth0Client({
-    domain: 'https://dev-lsauz5y1t0iz3nv2.us.auth0.com/oauth/token', // Auth0 Domain 
-    clientId: 'Z08tH8UDNQijeCdDklsHE5K9d7z2Q6Ay', // Auth0 Client ID 
+    domain: import.meta.env.VITE_AUTH0_DOMAIN,
+    clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
     authorizationParams: {
-      redirect_uri: window.location.origin, // Redirect URI (usually your frontend's base URL)
-      audience: 'https://dev-lsauz5y1t0iz3nv2.us.auth0.com/api/v2/', // API Identifier
-      scope: 'read:projects write:projects', // Scopes for API access
+      redirect_uri: window.location.origin,
+      audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      scope: 'read:projects write:projects'
     },
   });
 };

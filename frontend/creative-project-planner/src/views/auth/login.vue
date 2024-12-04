@@ -57,8 +57,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 bg-opacity-40">
-    <div class="w-full max-w-md p-8 bg-white border border-orange-400 rounded-xl shadow-xl">
+  <div class="flex min-h-screen">
+    <div class="flex flex-1">
+      <!-- Login Form Container -->
+      <div class="flex items-center justify-center w-full lg:w-1/2 p-8 bg-white">
+        <div class="w-full max-w-md">
       <!-- Authenticated state -->
       <div v-if="isAuthenticated" class="text-center mb-6">
         <p class="text-lg font-semibold text-gray-700">Welcome back, {{  }}!</p>
@@ -110,10 +113,16 @@ export default defineComponent({
           <a href="#" class="text-sm text-custom-peach hover:text-orange-500">Forgot your password?</a>
         </div> -->
 
-        <div class="mt-6 text-center">
-          <p class="text-sm text-orange-600">Don't have an account? <a href="/userRegister" class="text-custom-peach hover:text-orange-500">Sign up</a></p>
+            <div class="mt-6 text-center">
+              <p class="text-sm text-orange-600">Don't have an account? <a href="/userRegister" class="text-gray-600 hover:text-orange-500">Sign up</a></p>
+            </div>
+          </div>
         </div>
       </div>
+     <!-- Background Image Container -->
+      <div class="hidden lg:block w-1/2 relative">
+          <img src="@/assets/bg.png"alt="Login background" class="absolute insert-0 w-full h-full object-cover bg-center"/>
+        </div>
     </div>
   </div>
 </template>

@@ -3,7 +3,7 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProjectStore } from '@/store/projectStore';
-import ProjectCard from '@/views/project/projectCard.vue';
+import ProjectCard from '@/views/projects/projectCard.vue';
 
 const projectStore = useProjectStore();
 const router = useRouter();
