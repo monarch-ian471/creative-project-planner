@@ -1,12 +1,13 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import { userServices } from '@/services/userService';
+import { useProjectStore } from '@/store/projectStore'; // Importing Pinia store
 import { useAuth } from '@/composables/useAuth';
 
 export default defineComponent({
   name: 'UserProfile',
   setup() {
     const { user } = useAuth();
+    const projectStore = useProjectStore(); // Access the Pinia store
     const profile = ref({
       firstName: '',
       lastName: '',
@@ -29,9 +30,9 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        // Fetch user profile from backend
-        const fetchedProfile = await userServices.getUserProfile();
-        profile.value = { ...profile.value, ...fetchedProfile };
+        // Fetch user profile data from the Pinia store
+        await projectStore.fetchUserProfile();
+        profile.value = { ...profile.value, ...projectStore.userProfile };
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
@@ -40,12 +41,12 @@ export default defineComponent({
     const handleProfilePictureUpload = async (event: Event) => {
       const target = event.target as HTMLInputElement;
       const file = target.files?.[0];
-      
+
       if (file) {
         profilePictureFile.value = file;
         try {
-          const uploadedUrl = await userServices.uploadProfilePicture(file);
-          profile.value.profilePicture = uploadedUrl;
+          const uploadedUrl = await projectStore.uploadProfilePicture(file);
+          profile.value.profilePicture = uploadedUrl; // Update locally as well
         } catch (error) {
           console.error('Profile picture upload failed:', error);
         }
@@ -54,13 +55,11 @@ export default defineComponent({
 
     const updateProfile = async () => {
       try {
-        // Call backend service to update profile
-        await userServices.updateUserProfile(profile.value);
+        // Use the store's method to update the user profile
+        await projectStore.updateUserProfile(profile.value);
         isEditing.value = false;
-        // Optional: Show success notification
       } catch (error) {
         console.error('Profile update failed:', error);
-        // Optional: Show error notification
       }
     };
 
@@ -151,6 +150,14 @@ export default defineComponent({
                 class="w-full border p-2 rounded"
               />
             </div>
+          </div>
+          <div>
+            <label>Email</label>
+            <input 
+              v-model="profile.email" 
+              required 
+              class="w-full border p-2 rounded"
+            />
           </div>
           <!-- Add similar input fields for other profile details -->
         </form>

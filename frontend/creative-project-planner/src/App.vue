@@ -12,19 +12,15 @@ export default defineComponent({
     const isUserMenuOpen = ref(false);
     let menuTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    const toggleMobileMenu = () => {
-      isMobileMenuOpen.value = !isMobileMenuOpen.value;
-      if (isMobileMenuOpen.value) {
-        isUserMenuOpen.value = false;
-      }
-    };
-
-    const toggleUserMenu = () => {
-      isUserMenuOpen.value = !isUserMenuOpen.value;
-      if (isUserMenuOpen.value) {
-        isMobileMenuOpen.value = false;
-      }
-    };
+    const toggleMenu = (menuType: 'mobile' | 'user') => {
+        if (menuType === 'mobile') {
+          isMobileMenuOpen.value = !isMobileMenuOpen.value;
+          isUserMenuOpen.value = false;  // Close user menu if mobile menu opens
+        } else {
+          isUserMenuOpen.value = !isUserMenuOpen.value;
+          isMobileMenuOpen.value = false;  // Close mobile menu if user menu opens
+        }
+      };
 
     const openUserMenu = () => {
       isUserMenuOpen.value = true;
@@ -43,7 +39,7 @@ export default defineComponent({
       if (menuTimeout) {
         clearTimeout(menuTimeout);
       }
-      menuTimeout = setTimeout(closeUserMenu, 25000); // Menu will close after 5 seconds of inactivity
+      menuTimeout = setTimeout(closeUserMenu, 15000); // Menu will close after 5 seconds of inactivity
     };
     
     onUnmounted(() => {
@@ -67,8 +63,7 @@ export default defineComponent({
       closeUserMenu,
       resetMenuTimeout,
       isUserMenuOpen,
-      toggleMobileMenu,
-      toggleUserMenu,
+      toggleMenu,
       logIn,
       routes,
     };
@@ -94,7 +89,7 @@ export default defineComponent({
         v-for="route in routes"
         :key="route.path"
         :to="route.path"
-        class="text-lg font-medium hover:text-orange-500"
+        class="text-lg font-medium hover:text-orange-500 focus:outline-none"
       >
         {{ route.label }}
       </router-link>
@@ -102,7 +97,10 @@ export default defineComponent({
 
     <!-- Mobile Menu -->
     <div class="lg:hidden relative">
-      <button @click="toggleMobileMenu" class="text-lg font-medium focus:outline-none">
+      <button 
+      @click="toggleMenu('mobile')" 
+      class="text-lg font-medium focus:outline-none transition-all"
+      >
         <span v-if="!isMobileMenuOpen">☰</span>
         <span v-else>✕</span>
       </button>
@@ -124,7 +122,7 @@ export default defineComponent({
   <!-- User Menu -->
   <div class="relative">
         <button
-          @click="toggleUserMenu"
+        @click="toggleMenu('user')"
           class="px-4 py-2 rounded-lg bg-orange-500 text-white shadow-md hover:bg-orange-600 focus:outline-none"
         >
           Menu

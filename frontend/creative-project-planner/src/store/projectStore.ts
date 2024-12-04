@@ -1,7 +1,18 @@
-// src/stores/projectStore.ts
 import { defineStore } from 'pinia';
 import { Project, Task, UserProfile, ProfileStats } from '@/types/index';
 import { projectService } from '@/services/projectService';
+import axios from 'axios';
+
+// Axios interceptor to include Authorization header
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 interface ProjectState {
   projects: Project[];
@@ -40,7 +51,7 @@ export const useProjectStore = defineStore('projects', {
           projectService.getProjects(),
           projectService.getTasks()
         ]);
-        
+
         // Ensure date conversion
         this.projects = fetchedProjects.map(project => ({
           ...project,
@@ -49,7 +60,6 @@ export const useProjectStore = defineStore('projects', {
             : new Date(project.dueDate)
         }));
         
-        this.projects = fetchedProjects;
         this.tasks = fetchedTasks;
       } catch (error) {
         this.handleError(error, 'Failed to fetch data');
@@ -100,6 +110,18 @@ export const useProjectStore = defineStore('projects', {
         return this.profileStats;
       } catch (error) {
         this.handleError(error, 'Failed to fetch user stats');
+        throw error;
+      }
+    },
+
+    async updateUserProfile(profileData: UserProfile) {
+      try {
+        // Call the backend service to update the profile
+        const updatedProfile = await projectService.updateUserProfile(profileData);
+        this.userProfile = updatedProfile; // Update the userProfile in the store
+        return updatedProfile;
+      } catch (error) {
+        this.handleError(error, 'Failed to update user profile');
         throw error;
       }
     },

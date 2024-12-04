@@ -1,16 +1,16 @@
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
   initializeAuth0, 
   loginWithRedirect, 
   getAuth0Client, 
   logout as auth0Logout,
-  isAuthenticated as checkIsAuthenticated 
+  isAuthenticated as checkIsAuthenticated
 } from '@/views/auth/auth0';
 import { Auth0Client } from '@auth0/auth0-spa-js';
 import { useAuth } from '@/composables/useAuth';
-
+import { useProjectStore } from '@/store/projectStore'; // Import the project store
 
 export default defineComponent({
   name: 'LoginView',
@@ -23,12 +23,20 @@ export default defineComponent({
     const auth0Client = ref<Auth0Client | null>(null);
     const authenticationChecked = ref(false);
     const isAuthenticated = ref(false);
+    
+    // Use the project store to manage user profile and authentication state
+    const projectStore = useProjectStore();
 
     onMounted(async () => {
       try {
         auth0Client.value = await initializeAuth0();
         isAuthenticated.value = await checkIsAuthenticated();
         authenticationChecked.value = true;
+
+        // If the user is authenticated, try to fetch their profile
+        if (isAuthenticated.value) {
+          await projectStore.fetchUserProfile(); // Fetch user profile from the backend
+        }
       } catch (error) {
         console.error('Failed to initialize Auth0 client:', error);
         errorMessage.value = 'Authentication setup failed';
@@ -37,39 +45,43 @@ export default defineComponent({
     });
 
     const handleLogin = async () => {
-        const { login } = useAuth();
+      const { login } = useAuth();
         
-        // Reset error message and set loading state
-        errorMessage.value = '';
-        loading.value = true;
+      // Reset error message and set loading state
+      errorMessage.value = '';
+      loading.value = true;
 
-        try {
-          // Validate input fields before attempting login
-          if (!email.value || !password.value) {
-            throw new Error('Please enter both email and password');
-          }
-
-          // Use the existing login method from useAuth composable
-          await login(email.value, password.value);
-
-        } catch (error: any) {
-          // Set error message from the login method or a default message
-          errorMessage.value = error.message || 'Login failed. Please check your credentials and try again.';
-          console.error('Login error:', error);
-        } finally {
-          // Always set loading to false
-          loading.value = false;
+      try {
+        // Validate input fields before attempting login
+        if (!email.value || !password.value) {
+          throw new Error('Please enter both email and password');
         }
-      };
 
-  
+        // Use the existing login method from useAuth composable
+        await login(email.value, password.value);
+
+        // After successful login, fetch the user profile data from the backend
+        await projectStore.fetchUserProfile();
+
+        // Redirect the user after successful login
+        router.push('/dashboard'); // Change '/dashboard' to the desired redirect path
+      } catch (error: any) {
+        // Set error message from the login method or a default message
+        errorMessage.value = error.message || 'Login failed. Please check your credentials and try again.';
+        console.error('Login error:', error);
+      } finally {
+        // Always set loading to false
+        loading.value = false;
+      }
+    };
+
     const loginWithGoogle = async () => {
       try {
         if (!auth0Client.value) {
           throw new Error('Auth0 client not initialized');
         }
 
-        await loginWithRedirect();
+        await loginWithRedirect(); // Redirect for Google login
       } catch (error) {
         console.error('Google login error:', error);
         errorMessage.value = 'Google login failed';
@@ -82,7 +94,7 @@ export default defineComponent({
           throw new Error('Auth0 client not initialized');
         }
 
-        await loginWithRedirect();
+        await loginWithRedirect(); // Redirect for Facebook login
       } catch (error) {
         console.error('Facebook login error:', error);
         errorMessage.value = 'Facebook login failed';
@@ -93,6 +105,7 @@ export default defineComponent({
       try {
         await auth0Logout();
         isAuthenticated.value = false;
+        router.push('/login'); // Redirect to the login page after logout
       } catch (error) {
         console.error('Logout error:', error);
       }
@@ -176,35 +189,25 @@ export default defineComponent({
                   <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
                   <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.33-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
                   <path fill="#FBBC05" d="M11.67 28.18c-.44-1.32-.69-2.73-.69-4.18s.25-2.86.69-4.18v-5.7H4.34A21.991 21.991 0 0 0 2 24c0 3.55.85 6.91 2.34 9.88l7.33-5.7z"/>
-                  <path fill="#EA4335" d="M24 9.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 3.29 29.93 1 24 1 15.4 1 7.96 5.93 4.34 14.12l7.33 5.7c1.75-5.2 6.6-9.07 12.33-9.07z"/>
+                  <path fill="#EA4335" d="M24 9.75c3.23 0 6.02 1.08 8.06 2.88l6.03-6.03C35.02 2.74 29.83.5 24 .5 15.4.5 7.96 5.13 4.34 12.91L11.67 18c1.74-5.2 6.59-9.07 12.33-9.07z"/>
                 </svg>
-                Continue with Google
+                Login with Google
               </button>
 
               <button
                 @click="loginWithFacebook"
                 class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="mr-2 h-5 w-5">
-                  <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="mr-2 h-5 w-5">
+                  <path fill="#3b5998" d="M24 12.8c3.72 0 6.6 2.88 6.6 6.4 0 3.04-2.16 5.68-5.28 6.32v4.88h4.08c0-.04.08-.12.08-.16 0-.04-.08-.12-.08-.16l-4.08-4.88V21.2h-5.44c-.48 0-.96-.4-.96-.88V14.8c0-.48.48-.88.96-.88h5.44v-4.88h-4.08v4.88H16c-.48 0-.88-.4-.88-.88V14.8h4.08v4.88h5.44z"/>
                 </svg>
-                Continue with Facebook
+                Login with Facebook
               </button>
-            </div>
-
-            <div class="mt-6 text-center">
-              <p class="text-sm text-orange-600">
-                Don't have an account? 
-                <a href="/userRegister" class="text-gray-600 hover:text-orange-500">Sign up</a>
-              </p>
             </div>
           </div>
         </div>
       </div>
-      
-      <div class="hidden lg:block w-1/2 relative">
-        <img src="@/assets/bg.png" alt="Login background" class="absolute inset-0 w-full h-full object-cover bg-center"/>
-      </div>
     </div>
   </div>
 </template>
+

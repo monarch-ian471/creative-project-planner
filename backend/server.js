@@ -9,19 +9,30 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const User = require('./models/user.js').User;
 const app = express();
-const bodyParser = require('body-parser');
 const userRoutes = require('./routes/users');
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+
+// CORS Configuration
+const allowedOrigins = ['http://localhost:5173', 'https://your-frontend-domain.com']; // Replace with your frontend domain
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true); // Allow requests from allowed origins
+    } else {
+      callback(new Error('Not allowed by CORS')); // Reject requests from disallowed origins
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+  credentials: true, // If you need to support cookies or Authorization headers
+};
+
+// Use the CORS middleware
+app.use(cors(corsOptions)); // Enabling CORS for all routes
 
 // Auth0 configuration
 const checkJwt = expressJwt({
@@ -184,7 +195,7 @@ app.post('/api/users/social-login', async (req, res) => {
           provider,
           providerId: generateProviderId()
         }],
-        password: await bcrypt.hash(generateRandomPassword(), 10),
+        password: (generateRandomPassword(), 10),
         isVerified: true // Social login users are typically verified
       });
 
@@ -207,12 +218,7 @@ app.post('/api/users/social-login', async (req, res) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ 
-      id: user._id, 
-      email: user.email 
-    }, process.env.JWT_SECRET, { 
-      expiresIn: '30d' 
-    });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ 
       user: {
@@ -263,6 +269,7 @@ app.use((err, req, res, next) => {
 // Project Routes (CRUD)
 const Project = require('./models/project.js'); // Import the Project model
 
+app.use('/api/projects', projectRoutes);
 // Create a new project
 app.post('/api/projects', checkJwt, async (req, res) => {
   try {
@@ -283,17 +290,6 @@ app.get('/api/projects', checkJwt, async (req, res) => {
     res.status(500).json({ error: err.message });  // Handle errors
   }
 });
-
-// Get all projects
-app.get('/api/projects', checkJwt, async (req, res) => {
-  try {
-    const projects = await Project.find();
-    res.json(projects);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 
 // Get a single project by ID
 app.get('/api/projects/:id',checkJwt,  async (req, res) => {
@@ -328,5 +324,8 @@ app.put('/api/projects/:id', checkJwt, async (req, res) => {
   }
 });
 
+// Optional: Allow preflight requests (OPTIONS)
+app.options('*', cors(corsOptions)); // Handles CORS preflight
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on http://localhost: ${PORT}`));

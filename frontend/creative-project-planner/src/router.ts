@@ -1,19 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import store from '@/store'
-
 import { routes as AdminRoutes } from '@/views/admin'
 import { routes as AuthRoutes } from '@/views/auth'
 import { routes as PortalRoutes } from '@/views/portal'
 import { routes as ProjectsRoutes } from '@/views/projects'
 
 
+const baseUrl = import.meta.env.VITE_BASE_URL || '/';
+console.log(`Using base URL: ${baseUrl}`); // Log the base URL for debugging
 const router = createRouter({
-  history: createWebHistory(import.meta.env.VITE_BASE_URL || '/'), // Fallback to '/' if not set
+  history: createWebHistory(baseUrl),
   routes: [
     {
       path: '/',
       redirect: '/portal/homeview',
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('@/views/NotFound.vue'),
+    },    
     {
       path: '/auth',
       children: AuthRoutes,  // Ensure AuthRoutes are properly prefixed
@@ -31,21 +36,11 @@ const router = createRouter({
       children: ProjectsRoutes,  // Ensure PortalRoutes are properly prefixed
     },
   ]
-})
+});
 
-// // Navigation Guard
-// router.beforeEach((to, from, next) => {
-//   const isAuthenticated = store.getters['auth/isAuthenticated']
-  
-//   if (to.meta.requiresAuth && !isAuthenticated) {
-//     // Redirect to login if trying to access authenticated route
-//     next({ name: 'Login', query: { redirect: to.fullPath } })
-//   } else if (to.meta.requiresGuest && isAuthenticated) {
-//     // Redirect to dashboard if authenticated user tries to access login
-//     next({ name: 'Dashboard' })
-//   } else {
-//     next()
-//   }
-// })
+router.push('/:pathMatch(.*)*').catch(err => {
+  console.error('Navigation error:', err);
+  // Handle the error, e.g., by showing a user-friendly message or redirecting
+});
 
 export default router

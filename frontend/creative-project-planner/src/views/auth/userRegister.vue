@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { registerUser } from '@/services/userService'; // Import the user service
-
+import { useAuth0 } from '@auth0/auth0-vue'; // Import Auth0
 
 // Define the structure of your form
 interface Form {
@@ -39,83 +39,85 @@ interface FormErrors {
 
 export default {
   setup() {
-const router = useRouter();
-const { isAuthenticated } = useAuth();
+    const router = useRouter();
+    const { isAuthenticated, loginWithRedirect, user } = useAuth0(); // Get Auth0 methods
+    const form = ref<Form>({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      country: '',
+      streetAddress: '',
+      city: '',
+      region: '',
+      postalCode: '',
+      password: '',
+      notifications: {
+        sms: false,
+        email: false,
+      },
+    });
 
-// Ref for form data with proper typing
-const form = ref<Form>({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  country: '',
-  streetAddress: '',
-  city: '',
-  region: '',
-  postalCode: '',
-  password: '', // Add password field
-  notifications: {
-    sms: false,
-    email: false,
-  },
-});
+    const errors = ref<FormErrors>({});
 
-// Ref for form errors
-const errors = ref<FormErrors>({});
+    // Validate the form
+    const validateForm = (): boolean => {
+      errors.value = {};
+      if (!form.value.firstName) errors.value.firstName = 'First name is required';
+      if (!form.value.lastName) errors.value.lastName = 'Last name is required';
+      if (!form.value.email) errors.value.email = 'Email is required';
+      if (!form.value.phone) errors.value.phone = 'Phone number is required';
+      if (!form.value.country) errors.value.country = 'Country is required';
+      if (!form.value.streetAddress) errors.value.streetAddress = 'Street address is required';
+      if (!form.value.city) errors.value.city = 'City is required';
+      if (!form.value.region) errors.value.region = 'State / Province is required';
+      if (!form.value.postalCode) errors.value.postalCode = 'ZIP / Postal code is required';
+      if (!form.value.password) errors.value.password = 'Password is required';
 
-// Validate form
-const validateForm = (): boolean => {
-  errors.value = {}; // Clear previous errors
+      return Object.keys(errors.value).length === 0;
+    };
 
-  if (!form.value.firstName) errors.value.firstName = 'First name is required';
-  if (!form.value.lastName) errors.value.lastName = 'Last name is required';
-  if (!form.value.email) errors.value.email = 'Email is required';
-  if (!form.value.phone) errors.value.phone = 'Phone number is required';
-  if (!form.value.country) errors.value.country = 'Country is required';
-  if (!form.value.streetAddress) errors.value.streetAddress = 'Street address is required';
-  if (!form.value.city) errors.value.city = 'City is required';
-  if (!form.value.region) errors.value.region = 'State / Province is required';
-  if (!form.value.postalCode) errors.value.postalCode = 'ZIP / Postal code is required';
-  if (!form.value.password) errors.value.password = 'Password is required'; // Add password validation
+    // Handle form submission
+    const handleSubmit = async (event: Event): Promise<void> => {
+      event.preventDefault();
 
-  return Object.keys(errors.value).length === 0;
-};
+      if (validateForm()) {
+        try {
+          // First, handle user registration in your backend
+          const response = await registerUser({
+            firstName: form.value.firstName,
+            lastName: form.value.lastName,
+            email: form.value.email,
+            phone: form.value.phone,
+            country: form.value.country,
+            streetAddress: form.value.streetAddress,
+            city: form.value.city,
+            region: form.value.region,
+            postalCode: form.value.postalCode,
+            password: form.value.password,
+            notifications: {
+              sms: form.value.notifications.sms,
+              email: form.value.notifications.email,
+            },
+          });
 
-const handleSubmit = async (event: Event): Promise<void> => {
-  event.preventDefault();
-
-  if (validateForm()) {
-    try {
-      
-      const response = await registerUser({
-        // form fields
-        firstName: form.value.firstName,
-        lastName: form.value.lastName,
-        email: form.value.email,
-        phone: form.value.phone,
-        country: form.value.country,
-        streetAddress: form.value.streetAddress,
-        city: form.value.city,
-        region: form.value.region,
-        postalCode: form.value.postalCode,
-        password: form.value.password,
-        notifications: {
-          sms: form.value.notifications.sms,
-          email: form.value.notifications.email,
-        },
-      });
-
-      if (response.status === 201) { // Check if the response status indicates success
-        await router.push('/login');
-        console.log(response);
-      } else {
-        console.error('Unexpected response:', response);
+          // Check if the response is successful and proceed with Auth0 login if not authenticated
+          if (response.status === 201) {
+            // Register the user with Auth0 (optionally)
+            if (!isAuthenticated.value) {
+              await loginWithRedirect();
+            } else {
+              // If the user is already authenticated, push to login
+              await router.push('/login');
+            }
+          } else {
+            console.error('Unexpected response:', response);
+          }
+        } catch (error) {
+          console.error('Error registering user:', error);
+        }
       }
-    } catch (error) {
-      console.error('Error registering user:', error);
-    }
-  }
-};
+    };
 
     return {
       form,
@@ -130,17 +132,14 @@ const handleSubmit = async (event: Event): Promise<void> => {
   <div class="flex min-h-full flex-1">
     <div class="isolate px-6 py-12 sm:py-32 lg:px-8 w-full">
       <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-3xl font-extrabold tracking-tight text-black sm:text-2xl">
-          REGISTER ACCOUNT
-        </h2>
+        <h2 class="text-3xl font-extrabold tracking-tight text-black sm:text-2xl">REGISTER ACCOUNT</h2>
         <p class="mt-2 text-lg text-black-700">Fill in the details below to create a new account.</p>
       </div>
       <form
         class="mx-auto mt-10 max-w-4xl bg-white border border-orange-400 shadow-md ring-1 ring-orange-200 sm:rounded-lg p-8"
-          @submit.prevent="handleSubmit"
+        @submit.prevent="handleSubmit"
       >
         <div class="space-y-12">
-
           <div class="pb-12">
             <h2 class="text-xl font-semibold leading-7 text-orange-800 text-center">Personal Information</h2>
 
@@ -357,7 +356,6 @@ const handleSubmit = async (event: Event): Promise<void> => {
             <button
               type="submit"
               class="flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
-              @submit.prevent="handleSubmit"
             >
               Register
             </button>

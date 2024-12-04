@@ -6,15 +6,17 @@ const { User } = require('../models/user');  // Import the User model
 const Project = require('../models/project');
 
 
+const sanitizeFilename = require('sanitize-filename');
 // Multer storage configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, path.join(__dirname, '../uploads/profile-pictures'));
     },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, `profile-${uniqueSuffix}${path.extname(file.originalname)}`);
-    }
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const sanitizedFilename = sanitizeFilename(file.originalname);
+        cb(null, `profile-${uniqueSuffix}-${sanitizedFilename}`);
+      }
   });
   
   // Multer upload configuration
@@ -26,23 +28,26 @@ const storage = multer.diskStorage({
       if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
-        cb(new Error('Invalid file type'), false);
+        cb(new Error('Invalid file type. Only JPEG, PNG, and GIF are allowed.'));
       }
-    }
+    }    
   });
   // Get user profile endpoint
 router.get('/profile', async (req, res) => {
     try {
-      // Assuming you have user authentication middleware 
+      // Assuming you have user authentication middleware
+      const checkJwt = require('../middleware/checkJwt');
+      router.use(checkJwt); // Protect all routes in this file
+ 
       // that attaches user ID to the request
       const userId = req.user.id; 
   
       const user = await User.findById(userId).select('-password');
   
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: 'Unauthorized: No user ID found' });
       }
-  
+      
       res.json({
         profile: {
           firstName: user.firstName,
@@ -64,39 +69,47 @@ router.get('/profile', async (req, res) => {
   // Get user stats endpoint
   router.get('/stats', async (req, res) => {
     try {
-      const userId = req.user.id;
-  
-      const totalProjects = await Project.countDocuments({ userId });
-      const completedProjects = await Project.countDocuments({ 
-        userId, 
-        status: 'completed' 
-      });
-  
+      const stats = await Project.aggregate([
+        { $match: { userId: mongoose.Types.ObjectId(userId) } },
+        { 
+          $group: { 
+            _id: null,
+            totalProjects: { $sum: 1 },
+            completedProjects: { 
+              $sum: { 
+                $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] 
+              }
+            }
+          }
+        }
+      ]);
+      const result = stats[0] || { totalProjects: 0, completedProjects: 0 };
       res.json({
         stats: {
-          totalProjects,
-          completedProjects,
-          pendingProjects: totalProjects - completedProjects
-        }
+          totalProjects: result.totalProjects,
+          completedProjects: result.completedProjects,
+          pendingProjects: result.totalProjects - result.completedProjects,
+        },
       });
+      
     } catch (error) {
       res.status(500).json({ message: 'Error fetching user stats', error: error.message });
     }
   });
   
   // Upload profile picture endpoint
-  router.post('/profile-picture', upload.single('profilePicture'), async (req, res) => {
+  router.post('/profile-picture', upload.single('profilePicture'), async (req, err, res, next) => {
     try {
       const userId = req.user.id;
       
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: 'File upload error', error: err.message });
       }
   
       const user = await User.findById(userId);
   
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'Unexpected server error during file upload', error: err.message });
       }
   
       // Update user's profile picture path

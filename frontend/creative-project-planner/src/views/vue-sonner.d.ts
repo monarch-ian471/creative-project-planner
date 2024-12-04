@@ -39,6 +39,9 @@ declare module 'vue-sonner' {
     }
   
     export class Toaster {
+      static error(arg0: string) {
+        throw new Error('Method not implemented.')
+      }
       static install(app: App, options?: ToasterProps): void
     }
   
