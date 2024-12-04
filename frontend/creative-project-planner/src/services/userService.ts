@@ -64,6 +64,40 @@ export const registerUser = async (userData: UserData): Promise<AxiosResponse> =
 
 // User services
 export const userServices = {
+  // Add this to your existing userServices object
+      async updateUserProfile(profileData: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string;
+        country: string;
+        streetAddress: string;
+        city: string;
+        region: string;
+        postalCode: string;
+        profilePicture: string;
+        notifications: {
+          sms: boolean;
+          email: boolean;
+        }
+      }) {
+        try {
+          const auth0Client = await getAuth0Client();
+          if (!auth0Client) {
+            throw new Error('Auth0 client is not initialized');
+          }
+          const token = await auth0Client.getTokenSilently();
+          const response = await axios.put(`${API_BASE_URL}/profile`, profileData, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          return response.data;
+        } catch (error) {
+          console.error('Error updating user profile:', error);
+          throw error;
+        }
+      },
   // Fetch user profile
   async getUserProfile() {
     try {

@@ -1,8 +1,5 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-// import paintingImage from '@/assets/painting.png';
-// import muralPaintingImage from '@/assets/mural-painter.png';
-// import chairMakingImage from '@/assets/chair-making.png';
 
 export default defineComponent({
   name: 'App',
@@ -132,61 +129,6 @@ export default defineComponent({
             </div>
           </div>
         </section>
-
-        <!-- <div class="relative mt-8">
-            <div aria-hidden="true" class="absolute inset-0 hidden sm:flex sm:flex-col">
-              <div class="relative w-full flex-1 bg-gray-800">
-                <div class="absolute inset-0 overflow-hidden rounded-lg">
-                  <img src="https://tailwindui.com/plus/img/ecommerce-images/home-page-04-hero-full-width.jpg" alt="" class="size-full object-cover" />
-                </div>
-                <div class="absolute inset-0 bg-gray-900 opacity-50" />
-              </div>
-              <div class="h-32 w-full bg-white md:h-40 lg:h-48" />
-            </div>
-
-            <div class="relative mx-auto max-w-3xl px-4 pb-96 text-center sm:px-6 sm:pb-0 lg:px-8">
-
-              <div aria-hidden="true" class="absolute inset-0 flex flex-col sm:hidden">
-                <div class="relative w-full flex-1 bg-gray-800">
-                  <div class="absolute inset-0 overflow-hidden">
-                    <img src="https://tailwindui.com/plus/img/ecommerce-images/home-page-04-hero-full-width.jpg" alt="" class="size-full object-cover" />
-                  </div>
-                  <div class="absolute inset-0 bg-gray-900 opacity-50" />
-                </div>
-                <div class="h-48 w-full bg-white" />
-              </div>
-              <div class="relative py-16">
-                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">Recents On Projects</h1>
-                <div class="mt-2 sm:mt-6">
-                  <a href="/portal/community" class="inline-block border border-transparent bg-orange-500 px-8 py-3 font-medium text-white hover:bg-orange-700">Community</a>
-                </div>
-              </div>
-            </div>
-
-            <section aria-labelledby="collection-heading" class="relative -mt-96 sm:mt-0">
-              <h2 id="collection-heading" class="sr-only">Community</h2>
-              <div class="mx-auto grid max-w-md grid-cols-1 gap-y-6 px-4 sm:max-w-7xl sm:grid-cols-3 sm:gap-x-6 sm:gap-y-0 sm:px-6 lg:gap-x-8 lg:px-8">
-                <div v-for="collection in collections" :key="collection.name" class="group relative h-96 rounded-lg bg-white shadow-xl sm:aspect-[4/5] sm:h-auto">
-                  <div aria-hidden="true" class="absolute inset-0 overflow-hidden rounded-lg">
-                    <div class="absolute inset-0 overflow-hidden group-hover:opacity-75">
-                      <img :src="collection.imageSrc" :alt="collection.imageAlt" class="size-full object-cover" />
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50" />
-                  </div>
-                  <div class="absolute inset-0 flex items-end rounded-lg p-6">
-                    <div>
-                      <h3 class="mt-1 font-semibold text-white">
-                        <a :href="collection.href">
-                          <span class="absolute inset-0" />
-                          {{ collection.name }}
-                        </a>
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-            </div> -->
 
     <section class="mt-8 bg-hero-banner-bg bg-cover bg-center animate__animated animate__fadeIn animate__delay-1s min-h-[350px] text-center flex flex-col justify-between">
       <div class="text-white bg-black bg-opacity-75 p-6 rounded-lg text-center relative">

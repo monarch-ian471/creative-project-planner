@@ -7,10 +7,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { EventInput } from '@fullcalendar/core';
-import { 
-  initializeAuth0, 
-  getTokenSilently 
-} from '@/views/auth/auth0';
+import { initializeAuth0 } from '@/views/auth/auth0';
 import axios from 'axios';
 import ProjectCard from '@/views/projects/projectCard.vue';
 import ProjectForm from '@/views/projects/projectForm.vue';

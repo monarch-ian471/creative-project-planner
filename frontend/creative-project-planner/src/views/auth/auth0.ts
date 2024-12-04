@@ -1,82 +1,84 @@
-import { Auth0Client, RedirectLoginResult, createAuth0Client } from '@auth0/auth0-spa-js';
+import { Auth0Client, RedirectLoginResult, createAuth0Client, Auth0ClientOptions } from '@auth0/auth0-spa-js';
+import axios from 'axios'; 
 
 let auth0Client: Auth0Client | null = null;
 
-// Initialize the Auth0 client
-const initializeAuth = async (): Promise<void> => {
-  auth0Client = await createAuth0Client({
+export const initializeAuth0 = async (): Promise<Auth0Client> => {
+  if (auth0Client) return auth0Client;
+
+  const options: Auth0ClientOptions = {
     domain: import.meta.env.VITE_AUTH0_DOMAIN,
     clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
     authorizationParams: {
-      redirect_uri: window.location.origin,
+      redirect_uri: window.location.origin + '/callback',
       audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      scope: 'read:projects write:projects'
-    },
-  });
+      scope: 'openid profile email'
+    }
+  };
+
+  auth0Client = await createAuth0Client(options);
+  return auth0Client;
 };
 
-export const getTokenSilently = async (): Promise<string> => {
-  if (!auth0Client) {
-    throw new Error('Auth0 client has not been initialized');
-  }
+export const handleAuthCallback = async (): Promise<void> => {
+  const client = await initializeAuth0();
   
   try {
-    return await auth0Client.getTokenSilently();
+    await client.handleRedirectCallback();
+    const user = await client.getUser();
+    
+    if (user) {
+      await syncSocialLoginUser(user);
+    }
   } catch (error) {
-    console.error('Error getting token silently:', error);
+    console.error('Error handling auth callback:', error);
     throw error;
   }
 };
 
-// Get the Auth0 client
+const syncSocialLoginUser = async (socialUser: any) => {
+  try {
+    const response = await axios.post('/api/users/social-login', {
+      email: socialUser.email,
+      firstName: socialUser.given_name || socialUser.nickname,
+      lastName: socialUser.family_name,
+      profilePicture: socialUser.picture,
+      provider: socialUser.iss
+    });
+
+    localStorage.setItem('authToken', response.data.token);
+    return response.data.user;
+  } catch (error) {
+    console.error('Social login sync error:', error);
+    throw error;
+  }
+};
+
 export const getAuth0Client = (): Auth0Client | null => auth0Client;
 
-// Redirect login with Auth0
 export const loginWithRedirect = async (): Promise<void> => {
-  if (auth0Client) {
-    await auth0Client.loginWithRedirect();
-  } else {
-    throw new Error('Auth0 client has not been initialized');
-  }
+  const client = await initializeAuth0();
+  await client.loginWithRedirect();
 };
 
-// Handle the redirect callback after login
 export const handleRedirectCallback = async (): Promise<RedirectLoginResult> => {
-  if (auth0Client) {
-    return await auth0Client.handleRedirectCallback();
-  } else {
-    throw new Error('Auth0 client has not been initialized');
-  }
+  const client = await initializeAuth0();
+  return await client.handleRedirectCallback();
 };
 
-// Check if the user is authenticated
 export const isAuthenticated = async (): Promise<boolean> => {
-  if (auth0Client) {
-    return await auth0Client.isAuthenticated();
-  } else {
-    throw new Error('Auth0 client has not been initialized');
-  }
+  const client = await initializeAuth0();
+  return await client.isAuthenticated();
 };
 
-// Get the authenticated user's information
 export const getUser = async (): Promise<any> => {
-  if (auth0Client) {
-    return await auth0Client.getUser();
-  } else {
-    throw new Error('Auth0 client has not been initialized');
-  }
+  const client = await initializeAuth0();
+  return await client.getUser();
 };
 
-// Logout the user
-export const logout = (): void => {
-  if (auth0Client) {
-    auth0Client.logout({
-      logoutParams: { returnTo: window.location.origin }, // Redirect to this URL after logout
-    });
-  } else {
-    throw new Error('Auth0 client has not been initialized');
-  }
+export const logout = async (): Promise<void> => {
+  const client = await initializeAuth0();
+  client.logout({
+    logoutParams: { returnTo: window.location.origin }
+  });
 };
-
-// Initialize the Auth0 client (alias)
-export const initializeAuth0 = initializeAuth;

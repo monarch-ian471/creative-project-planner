@@ -1,7 +1,7 @@
 // src/services/projectService.ts
 import axios from 'axios';
 import { Project, Task } from '@/types/index';
-import { initializeAuth0, getTokenSilently } from '@/views/auth/auth0';
+import { initializeAuth0 } from '@/views/auth/auth0';
 
 const API_BASE_URL  = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,7 +11,7 @@ export const projectService = {
       await initializeAuth0();
       const response = await axios.get(`${API_BASE_URL}/projects`, {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data;
@@ -26,7 +26,7 @@ export const projectService = {
       await initializeAuth0();
       const response = await axios.get(`${API_BASE_URL}/tasks`, {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data;
@@ -41,7 +41,7 @@ export const projectService = {
       await initializeAuth0();
       const response = await axios.post(`${API_BASE_URL}/projects`, projectData, {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data;
@@ -56,7 +56,7 @@ export const projectService = {
       await initializeAuth0();
       const response = await axios.post(`${API_BASE_URL}/tasks`, taskData, {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data;
@@ -71,7 +71,7 @@ export const projectService = {
       await initializeAuth0();
       const response = await axios.get('/api/users/profile', {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data.profile;
@@ -85,7 +85,7 @@ export const projectService = {
     try {
       const response = await axios.get('/api/users/stats', {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data.stats;
@@ -103,7 +103,7 @@ export const projectService = {
       const response = await axios.post('/api/users/profile-picture', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data.profilePictureUrl;
@@ -118,7 +118,7 @@ export const projectService = {
       await initializeAuth0();
       const response = await axios.patch(`${API_BASE_URL}/projects/${projectId}`, projectData, {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
       return response.data;
@@ -133,7 +133,7 @@ export const projectService = {
       await initializeAuth0();
       await axios.delete(`${API_BASE_URL}/projects/${projectId}`, {
         headers: {
-          'Authorization': `Bearer ${await getTokenSilently()}`
+          'Authorization': `Bearer`
         }
       });
     } catch (error) {

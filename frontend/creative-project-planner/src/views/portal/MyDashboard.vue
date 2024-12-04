@@ -8,8 +8,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { EventInput } from '@fullcalendar/core';
 import { 
-  initializeAuth0, 
-  getTokenSilently 
+  initializeAuth0
 } from '@/views/auth/auth0';
 import axios from 'axios';
 import ProjectCard from '@/views/projects/projectCard.vue';

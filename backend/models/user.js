@@ -1,55 +1,71 @@
+// models/User.js
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    trim: true,
-    // Remove unique constraint if it's causing issues
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
     unique: true,
     lowercase: true,
-    trim: true,
+    trim: true
   },
-  phone: {
-    type: String,
-    trim: true,
-  },
-  country: String,
-  streetAddress: String,
-  city: String,
-  region: String,
-  postalCode: String,
-  password: {
+  firstName: {
     type: String,
     required: true,
+    trim: true
   },
-  notifications: {
-    sms: { type: Boolean, default: false },
-    email: { type: Boolean, default: false },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  }, profilePicture: {
+  password: {
+    type: String,
+    required: true
+  },
+  profilePicture: {
     type: String,
     default: '/uploads/profile-pictures/default-avatar.png'
   },
+  socialLogins: [{
+    provider: {
+      type: String,
+      enum: ['google', 'facebook', 'apple', 'microsoft']
+    },
+    providerId: {
+      type: String,
+      unique: true
+    }
+  }],
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'moderator'],
+    default: 'user'
+  },
+  preferences: {
+    notifications: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false }
+    },
+    theme: {
+      type: String,
+      default: 'light'
+    }
+  },
+  lastLogin: {
+    type: Date
+  }
 }, {
-
-  indexes: [
-    // Ensure a non-null index for firstName if needed
-    { firstName: 1 },
-  ]
+  timestamps: true
 });
-const User = mongoose.model('User', userSchema);
-module.exports = { User };
+
+// Add method to check if user has a specific social login
+UserSchema.methods.hasSocialLogin = function(provider) {
+  return this.socialLogins.some(login => login.provider === provider);
+};
+
+module.exports = mongoose.model('User', UserSchema);

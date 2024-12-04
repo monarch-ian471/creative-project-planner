@@ -151,6 +151,97 @@ app.post('/api/users/login', async (req, res) => {
 // Serve static files for profile pictures
 app.use('/uploads', express.static('uploads'));
 
+// Enhanced Social Login Route in server.js or routes/users.js
+app.post('/api/users/social-login', async (req, res) => {
+  const { 
+    email, 
+    firstName, 
+    lastName, 
+    profilePicture, 
+    provider 
+  } = req.body;
+
+  try {
+    // Validate input
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Check if user exists
+    let user = await User.findOne({ 
+      email, 
+      'socialLogins.provider': provider 
+    });
+
+    if (!user) {
+      // Create new user if not exists
+      user = new User({
+        email,
+        firstName,
+        lastName,
+        profilePicture,
+        socialLogins: [{
+          provider,
+          providerId: generateProviderId()
+        }],
+        password: await bcrypt.hash(generateRandomPassword(), 10),
+        isVerified: true // Social login users are typically verified
+      });
+
+      await user.save();
+    } else {
+      // Update existing user's information
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
+      user.profilePicture = profilePicture || user.profilePicture;
+      
+      // Ensure social login is tracked
+      if (!user.socialLogins.some(login => login.provider === provider)) {
+        user.socialLogins.push({
+          provider,
+          providerId: generateProviderId()
+        });
+      }
+
+      await user.save();
+    }
+
+    // Generate JWT
+    const token = jwt.sign({ 
+      id: user._id, 
+      email: user.email 
+    }, process.env.JWT_SECRET, { 
+      expiresIn: '30d' 
+    });
+
+    res.json({ 
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture
+      }, 
+      token 
+    });
+  } catch (error) {
+    console.error('Social login error:', error);
+    res.status(500).json({ 
+      message: 'Social login error', 
+      error: error.message 
+    });
+  }
+});
+
+// Utility functions
+function generateRandomPassword() {
+  return crypto.randomBytes(20).toString('hex');
+}
+
+function generateProviderId() {
+  return crypto.randomBytes(16).toString('hex');
+}
+
 
 app.use('/api/users', userRoutes);
 
