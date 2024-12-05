@@ -3,7 +3,7 @@ import { Auth0Client, RedirectLoginResult, createAuth0Client, Auth0ClientOptions
 import axios from 'axios'; 
 import { AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 
 let auth0Client: Auth0Client | null = null;
 

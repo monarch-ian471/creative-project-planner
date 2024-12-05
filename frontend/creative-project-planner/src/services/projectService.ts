@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { Project, Task, UserProfile } from '../types';
 import { getAuth0Client } from '@/views/auth/auth0'; // Make sure getAuth0Client is correctly imported
 
-const API_BASE_URL = import.meta.env.API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 
 const getAuthHeaders = async () => {
   try {

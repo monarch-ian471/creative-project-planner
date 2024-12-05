@@ -10,6 +10,8 @@ interface User {
   // Add other user properties as needed
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+
 export default defineComponent({
   name: 'LoginView',
   setup() {
@@ -26,7 +28,7 @@ export default defineComponent({
       loading.value = true;
 
       try {
-        const { data } = await axios.post('http://localhost:3000/api/users/login', {
+        const { data } = await axios.post(`${API_BASE_URL}/users/login`, {
           email: email.value,
           password: password.value
         });

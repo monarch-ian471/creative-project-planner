@@ -10,7 +10,7 @@ interface User {
   // Add other user properties as needed
 }
 
-const API_BASE_URL = import.meta.env.API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 
 export function useAuth() {
   const user: Ref<User | null> = ref(null);
@@ -52,6 +52,7 @@ export function useAuth() {
       }
     }
   };
+  
 
   const logout = async (): Promise<void> => {
     user.value = null;
