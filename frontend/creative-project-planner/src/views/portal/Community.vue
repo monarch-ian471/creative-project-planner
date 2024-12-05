@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, computed, defineProps, onMounted } from 'vue'
 import { 
   Heart, 
   MessageCircle, 
@@ -10,9 +9,8 @@ import {
   Filter, 
   Grid, 
   List 
-} from 'lucide-vue-next';
+} from 'lucide-vue-next'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Import project images
 const projectImages = {
   1: () => import('@/assets/crocheting.png'),
@@ -35,39 +33,59 @@ interface Project {
   budget: string;
 }
 
-// State
-const projects = ref<Project[]>([])
-const newComments = ref<{ [key: number]: string }>({})
-const filter = ref('All')
-const viewMode = ref('grid')
-const feedMessages = ref<{ user: string; text: string; timestamp: string }[]>([])
-const newMessage = ref('')
-
-// Fetch all projects from backend
-const fetchProjects = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/projects`); // Replace with your backend URL
-    const fetchedProjects: Project[] = response.data;
-    projects.value = [...projects.value, ...fetchedProjects]; // Append new projects
-    loadImages();
-  } catch (error) {
-    console.error('Error fetching projects:', error);
+// Initial Projects with More Detailed Information
+const initialProjects: Project[] = [
+  {
+    id: 1,
+    title: 'Crocheted Top',
+    description: 'A stylish crocheted top designed for comfort and fashion.',
+    image: () => projectImages[1](),
+    likes: 0,
+    comments: [],
+    category: 'Fashion',
+    author: 'Bubbly Crochets',
+    timeEstimate: '2 weeks',
+    budget: '15,000 MWK'
+  },
+  {
+    id: 2,
+    title: 'Home Painting Project',
+    description: 'Transforming interior spaces with a calming color palette.',
+    image: () => projectImages[2](),
+    likes: 0,
+    comments: [],
+    category: 'Home Improvement',
+    author: 'Alex Design',
+    timeEstimate: '1 week',
+    budget: '25,000 MWK'
+  },
+  {
+    id: 3,
+    title: 'Community Mural',
+    description: 'Creating a vibrant mural depicting local culture and history.',
+    image: () => projectImages[3](),
+    likes: 0,
+    comments: [],
+    category: 'Art',
+    author: 'Cultural Creators',
+    timeEstimate: '3 weeks',
+    budget: '50,000 MWK'
+  },
+  {
+    id: 4,
+    title: 'Custom Wooden Chairs',
+    description: 'Handcrafted wooden chairs with unique design elements.',
+    image: () => projectImages[4](),
+    likes: 0,
+    comments: [],
+    category: 'Woodworking',
+    author: 'Timber Masters',
+    timeEstimate: '2 weeks',
+    budget: '30,000 MWK'
   }
-}
+]
 
-// Add a new project to the backend
-const addNewProject = async (newProject: Project) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/projects`, newProject); // Replace with your backend URL
-    const createdProject: Project = response.data;
-    projects.value = [createdProject, ...projects.value]; // Add to the beginning of the list
-    loadImages();
-  } catch (error) {
-    console.error('Error adding new project:', error);
-  }
-}
-
-// Load project images dynamically
+// In your template, use an async computed property or method
 const resolvedImages = ref<{ [key: number]: string }>({})
 
 const loadImages = async () => {
@@ -76,6 +94,13 @@ const loadImages = async () => {
     resolvedImages.value[project.id] = imageModule.default;
   }
 }
+// State
+const projects = ref<Project[]>(initialProjects)
+const newComments = ref<{ [key: number]: string }>({})
+const filter = ref('All')
+const viewMode = ref('grid')
+const feedMessages = ref<{ user: string; text: string; timestamp: string }[]>([])
+const newMessage = ref('')
 
 // Computed
 const categories = computed(() => ['All', ...new Set(projects.value.map(p => p.category))])
@@ -134,11 +159,8 @@ const shareOnSocial = (platform: string, project: Project) => {
   window.open(shareUrl, '_blank')
 }
 
-// Fetch projects on mounted
-onMounted(() => {
-  loadImages();
-  fetchProjects();
-});
+
+onMounted(loadImages)
 </script>
 
 <template>

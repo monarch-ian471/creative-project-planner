@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, reactive } from 'vue';
+import { defineComponent, ref, onMounted, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProjectStore } from '@/store/projectStore';
 import FullCalendar from '@fullcalendar/vue3';
@@ -7,25 +7,34 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { EventInput } from '@fullcalendar/core';
+import { 
+  initializeAuth0
+} from '@/views/auth/auth0';
+import axios from 'axios';
+import ProjectCard from '@/views/projects/projectCard.vue';
+import ProjectForm from '@/views/projects/projectForm.vue';
 import { toast } from 'vue-sonner';
 import type { Project, Task, UserProfile } from '@/types/index';
 
 export default defineComponent({
   name: 'MyDashboard',
   components: {
-    FullCalendar
+    FullCalendar,
+    ProjectCard,
+    ProjectForm
   },
   setup() {
     const projectStore = useProjectStore();
     const router = useRouter();
 
+    // New state for project creation flyout
     const isProjectCreateFlyoutOpen = ref(false);
     const newProject = ref<Project>({
-      _id: '',
+      _id: '', // Add _id with empty string
       title: '',
       description: '',
       dueDate: new Date(),
-      status: 'pending'
+      status: 'pending' // Add a default status
     });
 
     const projects = computed<Project[]>(() => 
@@ -37,6 +46,7 @@ export default defineComponent({
       }))
     );
 
+    // Existing state variables
     const tasks = ref<Task[]>([]);
     
     const userPreferences = reactive({
@@ -58,6 +68,7 @@ export default defineComponent({
       events: [] as EventInput[],
     });
 
+    // Existing methods
     const fetchData = async () => {
       try {
         await projectStore.fetchData();
@@ -77,19 +88,20 @@ export default defineComponent({
       }
     };
 
+    // New method for project creation
     const handleCreateProject = async () => {
       try {
         if (!newProject.value.title.trim()) {
           toast.error('Project title is required');
           return;
         }
-
+        
         // Remove _id before creating project
         const { _id, ...projectData } = newProject.value;
-        const createdProject = await projectStore.createProject(projectData); // Creating the project
-
+        const createdProject = await projectStore.createProject(newProject.value);
+        
         toast.success('Project created successfully');
-
+        
         // Close flyout and reset form
         isProjectCreateFlyoutOpen.value = false;
         newProject.value = {
@@ -108,14 +120,17 @@ export default defineComponent({
       }
     };
 
+    // Toggle project creation flyout
     const toggleProjectCreateFlyout = () => {
       isProjectCreateFlyoutOpen.value = !isProjectCreateFlyoutOpen.value;
     };
 
+    // Existing navigation methods
     const openProjectDetail = (projectId: string) => {
       router.push(`/projects/${projectId}`);
     };
 
+    // Rest of the existing user profile and initialization logic
     const userProfile = ref<UserProfile>({
       firstName: 'Ian',
       lastName: 'Katengeza',
@@ -131,13 +146,18 @@ export default defineComponent({
 
     const profilePictureFile = ref<File | null>(null);
 
+    // Existing profile and initialization methods...
     const fetchUserProfile = async () => { /* existing implementation */ };
     const fetchUserStats = async () => { /* existing implementation */ };
     const handleFileUpload = (event: Event) => { /* existing implementation */ };
 
+    // Initialization
     onMounted(async () => {
       try {
+        await initializeAuth0();
         await projectStore.fetchData()
+        await fetchUserProfile();
+        await fetchUserStats();
         await fetchData();
       } catch (error) {
         console.error('Initialization error:', error);
@@ -153,6 +173,8 @@ export default defineComponent({
       profileStats,
       handleFileUpload,
       openProjectDetail,
+      
+      // New project creation properties
       isProjectCreateFlyoutOpen,
       newProject,
       toggleProjectCreateFlyout,
@@ -184,6 +206,14 @@ export default defineComponent({
               alt="Profile" 
               class="w-24 h-24 rounded-full object-cover border-4 border-orange-400"
             />
+            <div 
+              class="absolute bottom-0 right-0 bg-orange-400 text-white rounded-full w-8 h-8 flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
           </label>
         </div>
         
@@ -192,6 +222,9 @@ export default defineComponent({
             {{ userProfile.firstName }} {{ userProfile.lastName }}
           </h2>
           <p class="text-gray-600 mb-2">{{ userProfile.email }}</p>
+          <p class="text-gray-500">
+            {{ userProfile.location?.city }}, {{ userProfile.location?.country }}
+          </p>
         </div>
         
         <div class="grid grid-cols-3 gap-4 text-center">
@@ -270,51 +303,14 @@ export default defineComponent({
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 class="text-2xl font-semibold mb-6">Create New Project</h2>
         
-        <div class="mb-4">
-          <label class="block text-gray-700">Project Title</label>
-          <input 
-            v-model="newProject.title" 
-            type="text" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Enter project title"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-gray-700">Description</label>
-          <textarea 
-            v-model="newProject.description" 
-            rows="4" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Enter project description"
-          ></textarea>
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-gray-700">Due Date</label>
-          <input 
-            v-model="newProject.dueDate" 
-            type="date" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg"
-          />
-        </div>
-
-        <div class="flex justify-end space-x-4">
-          <button 
-            @click="toggleProjectCreateFlyout" 
-            class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button 
-            @click="handleCreateProject" 
-            class="bg-orange-400 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            Create Project
-          </button>
-        </div>
+        <h2 class="text-2xl font-bold mb-6 text-center">Create New Project</h2>
+        
+        <ProjectForm
+          :isEditing="false"
+          :project="newProject"
+          @submit="handleCreateProject"
+        />
       </div>
     </div>
   </div>

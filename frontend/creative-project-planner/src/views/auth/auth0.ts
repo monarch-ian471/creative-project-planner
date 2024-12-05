@@ -3,6 +3,8 @@ import { Auth0Client, RedirectLoginResult, createAuth0Client, Auth0ClientOptions
 import axios from 'axios'; 
 import { AxiosError } from 'axios';
 
+const API_BASE_URL = import.meta.env.API_BASE_URL;
+
 let auth0Client: Auth0Client | null = null;
 
 export const initializeAuth0 = async (): Promise<Auth0Client> => {
@@ -50,7 +52,7 @@ export const handleAuthCallback = async (): Promise<void> => {
 
 const syncSocialLoginUser = async (socialUser: any) => {
   try {
-    const response = await axios.post('/api/users/social-login', {
+    const response = await axios.post(`${API_BASE_URL}/users/social-login`, {
       email: socialUser.email,
       firstName: socialUser.given_name || socialUser.nickname,
       lastName: socialUser.family_name,

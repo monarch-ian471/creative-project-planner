@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { Project, Task, UserProfile } from '@/types/index';
+import { Project, Task, UserProfile } from '../types/index';
 import { getAuth0Client } from '@/views/auth/auth0'; // Make sure getAuth0Client is correctly imported
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.API_BASE_URL;
 
 const getAuthHeaders = async () => {
   try {
@@ -66,7 +66,7 @@ export const projectService = {
   async fetchUserProfile() {
     try {
       const headers = await getAuthHeaders();
-      const response = await axios.get('/api/users/profile', { headers });
+      const response = await axios.get(`${API_BASE_URL}/users/profile`, { headers });
       return response.data.profile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -77,7 +77,7 @@ export const projectService = {
   async fetchUserStats() {
     try {
       const headers = await getAuthHeaders();
-      const response = await axios.get('/api/users/stats', { headers });
+      const response = await axios.get(`${API_BASE_URL}/users/stats`, { headers });
       return response.data.stats;
     } catch (error) {
       console.error('Error fetching user stats:', error);
@@ -86,7 +86,7 @@ export const projectService = {
   },
 
   async updateUserProfile(profileData: UserProfile) {
-    const response = await fetch('/api/user/profile', {
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export const projectService = {
 
     try {
       const headers = await getAuthHeaders();
-      const response = await axios.post('/api/users/profile-picture', formData, {
+      const response = await axios.post(`${API_BASE_URL}/users/profile-picture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           ...headers // Include the authorization token here

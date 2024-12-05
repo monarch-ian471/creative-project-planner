@@ -1,28 +1,17 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { useProjectStore } from '@/store/projectStore'; // Importing Pinia store
-import { useAuth } from '@/composables/useAuth';
 
 export default defineComponent({
   name: 'UserProfile',
   setup() {
-    const { user } = useAuth();
-    const projectStore = useProjectStore(); // Access the Pinia store
+    const projectStore = useProjectStore();
     const profile = ref({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      country: '',
-      streetAddress: '',
-      city: '',
-      region: '',
-      postalCode: '',
+      firstName: '', lastName: '', email: '', phone: '',
+      country: '', streetAddress: '', city: '', 
+      region: '', postalCode: '',
       profilePicture: '/uploads/profile-pictures/default-avatar.png',
-      notifications: {
-        sms: false,
-        email: false
-      }
+      notifications: { sms: false, email: false }
     });
 
     const profilePictureFile = ref<File | null>(null);
@@ -30,32 +19,29 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        // Fetch user profile data from the Pinia store
         await projectStore.fetchUserProfile();
         profile.value = { ...profile.value, ...projectStore.userProfile };
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Profile fetch error:', error);
       }
     });
 
     const handleProfilePictureUpload = async (event: Event) => {
-      const target = event.target as HTMLInputElement;
-      const file = target.files?.[0];
-
+      const file = (event.target as HTMLInputElement).files?.[0];
+      
       if (file) {
         profilePictureFile.value = file;
         try {
           const uploadedUrl = await projectStore.uploadProfilePicture(file);
-          profile.value.profilePicture = uploadedUrl; // Update locally as well
+          profile.value.profilePicture = uploadedUrl;
         } catch (error) {
-          console.error('Profile picture upload failed:', error);
+          console.error('Picture upload failed:', error);
         }
       }
     };
 
     const updateProfile = async () => {
       try {
-        // Use the store's method to update the user profile
         await projectStore.updateUserProfile(profile.value);
         isEditing.value = false;
       } catch (error) {

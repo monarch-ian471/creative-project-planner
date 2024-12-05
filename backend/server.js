@@ -10,6 +10,8 @@ const connectDB = require('./config/db');
 const User = require('./models/user.js').User;
 const app = express();
 const userRoutes = require('./routes/users');
+const projectRoutes = require('./routes/projects');
+
 
 
 // Middleware

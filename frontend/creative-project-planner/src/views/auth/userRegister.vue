@@ -2,10 +2,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
-import { registerUser } from '@/services/userService'; // Import the user service
-import { useAuth0 } from '@auth0/auth0-vue'; // Import Auth0
+import axios, { AxiosResponse } from 'axios'; // Import AxiosResponse
+import { registerUser } from '@/services/userService';
 
-// Define the structure of your form
+// Define the structure of your form interface
 interface Form {
   firstName: string;
   lastName: string;
@@ -16,14 +16,14 @@ interface Form {
   city: string;
   region: string;
   postalCode: string;
-  password: string; // Add password field
+  password: string;
   notifications: {
     sms: boolean;
     email: boolean;
   };
 }
 
-// Define the structure for form errors
+// Define the structure for form errors interface
 interface FormErrors {
   firstName?: string;
   lastName?: string;
@@ -34,13 +34,15 @@ interface FormErrors {
   city?: string;
   region?: string;
   postalCode?: string;
-  password?: string; // Add password field
+  password?: string;
 }
 
 export default {
   setup() {
     const router = useRouter();
-    const { isAuthenticated, loginWithRedirect, user } = useAuth0(); // Get Auth0 methods
+    const { isAuthenticated } = useAuth();
+
+    // Ref for form data with proper typing
     const form = ref<Form>({
       firstName: '',
       lastName: '',
@@ -58,11 +60,13 @@ export default {
       },
     });
 
+    // Ref for form errors
     const errors = ref<FormErrors>({});
 
-    // Validate the form
+    // Validate form
     const validateForm = (): boolean => {
-      errors.value = {};
+      errors.value = {}; // Clear previous errors
+      
       if (!form.value.firstName) errors.value.firstName = 'First name is required';
       if (!form.value.lastName) errors.value.lastName = 'Last name is required';
       if (!form.value.email) errors.value.email = 'Email is required';
@@ -73,17 +77,15 @@ export default {
       if (!form.value.region) errors.value.region = 'State / Province is required';
       if (!form.value.postalCode) errors.value.postalCode = 'ZIP / Postal code is required';
       if (!form.value.password) errors.value.password = 'Password is required';
-
+      
       return Object.keys(errors.value).length === 0;
     };
 
-    // Handle form submission
     const handleSubmit = async (event: Event): Promise<void> => {
       event.preventDefault();
-
+      
       if (validateForm()) {
         try {
-          // First, handle user registration in your backend
           const response = await registerUser({
             firstName: form.value.firstName,
             lastName: form.value.lastName,
@@ -101,20 +103,20 @@ export default {
             },
           });
 
-          // Check if the response is successful and proceed with Auth0 login if not authenticated
-          if (response.status === 201) {
-            // Register the user with Auth0 (optionally)
-            if (!isAuthenticated.value) {
-              await loginWithRedirect();
-            } else {
-              // If the user is already authenticated, push to login
-              await router.push('/login');
-            }
+          // Add type guard and null check
+          if (response && response.status === 201) {
+            await router.push('/login');
+            console.log(response);
           } else {
             console.error('Unexpected response:', response);
           }
         } catch (error) {
-          console.error('Error registering user:', error);
+          // Improve error handling
+          if (axios.isAxiosError(error)) {
+            console.error('Registration error:', error.response?.data || error.message);
+          } else {
+            console.error('Unexpected error registering user:', error);
+          }
         }
       }
     };
@@ -132,14 +134,17 @@ export default {
   <div class="flex min-h-full flex-1">
     <div class="isolate px-6 py-12 sm:py-32 lg:px-8 w-full">
       <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-3xl font-extrabold tracking-tight text-black sm:text-2xl">REGISTER ACCOUNT</h2>
+        <h2 class="text-3xl font-extrabold tracking-tight text-black sm:text-2xl">
+          REGISTER ACCOUNT
+        </h2>
         <p class="mt-2 text-lg text-black-700">Fill in the details below to create a new account.</p>
       </div>
       <form
         class="mx-auto mt-10 max-w-4xl bg-white border border-orange-400 shadow-md ring-1 ring-orange-200 sm:rounded-lg p-8"
-        @submit.prevent="handleSubmit"
+          @submit.prevent="handleSubmit"
       >
         <div class="space-y-12">
+
           <div class="pb-12">
             <h2 class="text-xl font-semibold leading-7 text-orange-800 text-center">Personal Information</h2>
 
@@ -356,6 +361,7 @@ export default {
             <button
               type="submit"
               class="flex justify-center rounded-md border border-transparent bg-orange-600 px-6 py-3 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 sm:text-sm"
+              @submit.prevent="handleSubmit"
             >
               Register
             </button>

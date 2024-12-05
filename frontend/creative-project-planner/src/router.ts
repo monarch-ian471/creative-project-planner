@@ -14,11 +14,11 @@ const router = createRouter({
       path: '/',
       redirect: '/portal/homeview',
     },
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'NotFound',
-      component: () => import('@/views/NotFound.vue'),
-    },    
+    // {
+    //   path: '/:pathMatch(.*)*',
+    //   name: 'NotFound',
+    //   component: () => import('@/views/NotFound.vue'),
+    // },    
     {
       path: '/auth',
       children: AuthRoutes,  // Ensure AuthRoutes are properly prefixed
@@ -38,9 +38,9 @@ const router = createRouter({
   ]
 });
 
-router.push('/:pathMatch(.*)*').catch(err => {
-  console.error('Navigation error:', err);
-  // Handle the error, e.g., by showing a user-friendly message or redirecting
-});
+// router.push('/').catch(err => {
+//   console.error('Navigation error:', err);
+//   // Handle the error, e.g., by showing a user-friendly message or redirecting
+// });
 
 export default router
