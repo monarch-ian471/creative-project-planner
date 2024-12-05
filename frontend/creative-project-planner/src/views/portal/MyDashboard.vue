@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, onMounted, reactive, computed } from 'vue';
+import { defineComponent, ref, onMounted, reactive, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProjectStore } from '@/store/projectStore';
 import FullCalendar from '@fullcalendar/vue3';
@@ -7,12 +7,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { EventInput } from '@fullcalendar/core';
-import { 
-  initializeAuth0
-} from '@/views/auth/auth0';
-import axios from 'axios';
-import ProjectCard from '@/views/projects/projectCard.vue';
-import ProjectForm from '@/views/projects/projectForm.vue';
+import { initializeAuth0 } from '@/views/auth/auth0';
 import { toast } from 'vue-sonner';
 import type { Project, Task, UserProfile } from '@/types/index';
 
@@ -20,23 +15,24 @@ export default defineComponent({
   name: 'MyDashboard',
   components: {
     FullCalendar,
-    ProjectCard,
-    ProjectForm
+    ProjectCard: () => import('@/views/projects/projectCard.vue'),
+    ProjectForm: () => import('@/views/projects/projectForm.vue')
   },
   setup() {
     const projectStore = useProjectStore();
     const router = useRouter();
 
-    // New state for project creation flyout
+    // Reactive state for project creation
     const isProjectCreateFlyoutOpen = ref(false);
     const newProject = ref<Project>({
-      _id: '', // Add _id with empty string
+      _id: '',
       title: '',
       description: '',
       dueDate: new Date(),
-      status: 'pending' // Add a default status
+      status: 'pending'
     });
 
+    // Computed projects with proper date handling
     const projects = computed<Project[]>(() => 
       projectStore.projects.map(project => ({
         ...project,
@@ -46,13 +42,12 @@ export default defineComponent({
       }))
     );
 
-    // Existing state variables
-    const tasks = ref<Task[]>([]);
-    
-    const userPreferences = reactive({
-      showCalendar: true,
+    // Add this to your reactive state in the setup function
+    const userPreferences = ref({
+      showCalendar: true // or whatever default value you want
     });
 
+    // Calendar options with improved event handling
     const calendarOptions = ref({
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       initialView: 'dayGridMonth',
@@ -68,7 +63,7 @@ export default defineComponent({
       events: [] as EventInput[],
     });
 
-    // Existing methods
+    // Improved data fetching with error handling
     const fetchData = async () => {
       try {
         await projectStore.fetchData();
@@ -79,16 +74,14 @@ export default defineComponent({
           allDay: true
         }));
 
-        calendarOptions.value = {
-          ...calendarOptions.value,
-          events: calendarEventsList
-        };
+        calendarOptions.value.events = calendarEventsList;
       } catch (error) {
         console.error('Error fetching data:', error);
+        toast.error('Failed to load projects');
       }
     };
 
-    // New method for project creation
+    // Enhanced project creation method
     const handleCreateProject = async () => {
       try {
         if (!newProject.value.title.trim()) {
@@ -96,13 +89,11 @@ export default defineComponent({
           return;
         }
         
-        // Remove _id before creating project
-        const { _id, ...projectData } = newProject.value;
         const createdProject = await projectStore.createProject(newProject.value);
         
         toast.success('Project created successfully');
         
-        // Close flyout and reset form
+        // Reset project creation state
         isProjectCreateFlyoutOpen.value = false;
         newProject.value = {
           _id: '',
@@ -112,7 +103,7 @@ export default defineComponent({
           status: 'pending'
         };
 
-        // Refresh data to show new project
+        // Refresh data
         await fetchData();
       } catch (error) {
         console.error('Failed to create project', error);
@@ -120,17 +111,33 @@ export default defineComponent({
       }
     };
 
-    // Toggle project creation flyout
-    const toggleProjectCreateFlyout = () => {
-      isProjectCreateFlyoutOpen.value = !isProjectCreateFlyoutOpen.value;
+    const handleFileUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      // Update profile picture
+      if (e.target?.result) {
+        userProfile.value.profilePicture = e.target.result as string;
+      }
     };
+    
+    reader.readAsDataURL(file);
+  }
+};
 
-    // Existing navigation methods
+    // Navigation and interaction methods
     const openProjectDetail = (projectId: string) => {
       router.push(`/projects/${projectId}`);
     };
 
-    // Rest of the existing user profile and initialization logic
+    const toggleProjectCreateFlyout = () => {
+      isProjectCreateFlyoutOpen.value = !isProjectCreateFlyoutOpen.value;
+    };
+
+    // User profile and initialization
     const userProfile = ref<UserProfile>({
       firstName: 'Ian',
       lastName: 'Katengeza',
@@ -144,41 +151,48 @@ export default defineComponent({
       pendingTasks: 8
     });
 
-    const profilePictureFile = ref<File | null>(null);
+    // Prevent black overlay by adding click outside handling
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isProjectCreateFlyoutOpen.value) {
+        const flyout = document.querySelector('.project-flyout');
+        if (flyout && !flyout.contains(event.target as Node)) {
+          isProjectCreateFlyoutOpen.value = false;
+        }
+      }
+    };
 
-    // Existing profile and initialization methods...
-    const fetchUserProfile = async () => { /* existing implementation */ };
-    const fetchUserStats = async () => { /* existing implementation */ };
-    const handleFileUpload = (event: Event) => { /* existing implementation */ };
-
-    // Initialization
+    // Lifecycle hooks and initialization
     onMounted(async () => {
       try {
         await initializeAuth0();
-        await projectStore.fetchData()
-        await fetchUserProfile();
-        await fetchUserStats();
+        await projectStore.fetchData();
         await fetchData();
+        
+        // Add click outside listener
+        document.addEventListener('mousedown', handleClickOutside);
       } catch (error) {
         console.error('Initialization error:', error);
+        toast.error('Failed to load dashboard');
       }
+    });
+
+    // Cleanup listener on component unmount
+    onUnmounted(() => {
+      document.removeEventListener('mousedown', handleClickOutside);
     });
 
     return {
       projects,
-      tasks,
-      userPreferences,
-      calendarOptions,
       userProfile,
       profileStats,
-      handleFileUpload,
-      openProjectDetail,
-      
-      // New project creation properties
+      calendarOptions,
+      userPreferences, // Add this
       isProjectCreateFlyoutOpen,
       newProject,
+      openProjectDetail,
       toggleProjectCreateFlyout,
       handleCreateProject,
+      handleFileUpload, // Add this
     };
   },
 });
@@ -186,6 +200,32 @@ export default defineComponent({
 
 <template>
   <div class="min-h-screen bg-gray-50 p-6 rounded-lg border border-gray-800 relative">
+    <!-- Project Creation Flyout (Optimized) -->
+    <div 
+      v-if="isProjectCreateFlyoutOpen" 
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+    >
+      <div 
+        class="project-flyout bg-white w-full max-w-xl mx-auto rounded-lg shadow-xl p-8 relative"
+      >
+        <button 
+          @click="toggleProjectCreateFlyout"
+          class="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Create New Project</h2>
+        
+        <ProjectForm
+          :isEditing="false"
+          :project="newProject"
+          @submit="handleCreateProject"
+        />
+      </div>
+    </div>
     <div class="container mx-auto">
       <!-- Profile Header (existing implementation) -->
       <div class="bg-white shadow-md rounded-lg p-6 mb-8 border border-gray-800 flex items-center">

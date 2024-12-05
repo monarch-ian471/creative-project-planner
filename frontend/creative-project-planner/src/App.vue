@@ -60,7 +60,7 @@ export default defineComponent({
       { path: '/portal/homeview', label: 'Home' },
       { path: '/portal/community', label: 'Community' },
       { path: '/portal/mydashboard', label: 'Dashboard' },
-      { path: '/portal/projects', label: 'Projects' },
+      { path: '/portal/userprojects', label: 'Projects' },
     ];
     return {
       isMobileMenuOpen,

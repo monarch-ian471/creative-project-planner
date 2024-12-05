@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Project, Task, UserProfile } from '../types/index';
+import type { Project, Task, UserProfile } from '../types';
 import { getAuth0Client } from '@/views/auth/auth0'; // Make sure getAuth0Client is correctly imported
 
 const API_BASE_URL = import.meta.env.API_BASE_URL;
@@ -24,8 +24,15 @@ export const projectService = {
       const headers = await getAuthHeaders();
       const response = await axios.get(`${API_BASE_URL}/projects`, { headers });
       return response.data;
-    } catch (error) {
-      console.error('Failed to fetch projects', error);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error('Failed to fetch projects', error.response?.data);
+        console.error('Error Status:', error.response?.status);
+      } else if (error instanceof Error) {
+        console.error('Failed to fetch projects', error.message);
+      } else {
+        console.error('An unknown error occurred while fetching projects');
+      }
       throw error;
     }
   },
