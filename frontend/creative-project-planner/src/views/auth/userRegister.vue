@@ -2,10 +2,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
-import axios, { AxiosResponse } from 'axios'; // Import AxiosResponse
-import { registerUser } from '@/services/userService';
+import { registerUser } from '@/services/userService'; // Import the user service
 
-// Define the structure of your form interface
+
+// Define the structure of your form
 interface Form {
   firstName: string;
   lastName: string;
@@ -16,14 +16,14 @@ interface Form {
   city: string;
   region: string;
   postalCode: string;
-  password: string;
+  password: string; // Add password field
   notifications: {
     sms: boolean;
     email: boolean;
   };
 }
 
-// Define the structure for form errors interface
+// Define the structure for form errors
 interface FormErrors {
   firstName?: string;
   lastName?: string;
@@ -34,92 +34,88 @@ interface FormErrors {
   city?: string;
   region?: string;
   postalCode?: string;
-  password?: string;
+  password?: string; // Add password field
 }
 
 export default {
   setup() {
-    const router = useRouter();
-    const { isAuthenticated } = useAuth();
+const router = useRouter();
+const { isAuthenticated } = useAuth();
 
-    // Ref for form data with proper typing
-    const form = ref<Form>({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      country: '',
-      streetAddress: '',
-      city: '',
-      region: '',
-      postalCode: '',
-      password: '',
-      notifications: {
-        sms: false,
-        email: false,
-      },
-    });
+// Ref for form data with proper typing
+const form = ref<Form>({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  country: '',
+  streetAddress: '',
+  city: '',
+  region: '',
+  postalCode: '',
+  password: '', // Add password field
+  notifications: {
+    sms: false,
+    email: false,
+  },
+});
 
-    // Ref for form errors
-    const errors = ref<FormErrors>({});
+// Ref for form errors
+const errors = ref<FormErrors>({});
 
-    // Validate form
-    const validateForm = (): boolean => {
-      errors.value = {}; // Clear previous errors
+// Validate form
+const validateForm = (): boolean => {
+  errors.value = {}; // Clear previous errors
+
+  if (!form.value.firstName) errors.value.firstName = 'First name is required';
+  if (!form.value.lastName) errors.value.lastName = 'Last name is required';
+  if (!form.value.email) errors.value.email = 'Email is required';
+  if (!form.value.phone) errors.value.phone = 'Phone number is required';
+  if (!form.value.country) errors.value.country = 'Country is required';
+  if (!form.value.streetAddress) errors.value.streetAddress = 'Street address is required';
+  if (!form.value.city) errors.value.city = 'City is required';
+  if (!form.value.region) errors.value.region = 'State / Province is required';
+  if (!form.value.postalCode) errors.value.postalCode = 'ZIP / Postal code is required';
+  if (!form.value.password) errors.value.password = 'Password is required'; // Add password validation
+
+  return Object.keys(errors.value).length === 0;
+};
+
+const handleSubmit = async (event: Event): Promise<void> => {
+  event.preventDefault();
+
+  if (validateForm()) {
+    try {
       
-      if (!form.value.firstName) errors.value.firstName = 'First name is required';
-      if (!form.value.lastName) errors.value.lastName = 'Last name is required';
-      if (!form.value.email) errors.value.email = 'Email is required';
-      if (!form.value.phone) errors.value.phone = 'Phone number is required';
-      if (!form.value.country) errors.value.country = 'Country is required';
-      if (!form.value.streetAddress) errors.value.streetAddress = 'Street address is required';
-      if (!form.value.city) errors.value.city = 'City is required';
-      if (!form.value.region) errors.value.region = 'State / Province is required';
-      if (!form.value.postalCode) errors.value.postalCode = 'ZIP / Postal code is required';
-      if (!form.value.password) errors.value.password = 'Password is required';
-      
-      return Object.keys(errors.value).length === 0;
-    };
+      const response = await registerUser({
+        // form fields
+        firstName: form.value.firstName,
+        lastName: form.value.lastName,
+        email: form.value.email,
+        phone: form.value.phone,
+        country: form.value.country,
+        streetAddress: form.value.streetAddress,
+        city: form.value.city,
+        region: form.value.region,
+        postalCode: form.value.postalCode,
+        password: form.value.password,
+        notifications: {
+          sms: form.value.notifications.sms,
+          email: form.value.notifications.email,
+        },
+      });
 
-    const handleSubmit = async (event: Event): Promise<void> => {
-      event.preventDefault();
-      
-      if (validateForm()) {
-        try {
-          const response = await registerUser({
-            firstName: form.value.firstName,
-            lastName: form.value.lastName,
-            email: form.value.email,
-            phone: form.value.phone,
-            country: form.value.country,
-            streetAddress: form.value.streetAddress,
-            city: form.value.city,
-            region: form.value.region,
-            postalCode: form.value.postalCode,
-            password: form.value.password,
-            notifications: {
-              sms: form.value.notifications.sms,
-              email: form.value.notifications.email,
-            },
-          });
-
-          // Add type guard and null check
-          if (response && response.status === 201) {
-            await router.push('/login');
-            console.log(response);
-          } else {
-            console.error('Unexpected response:', response);
-          }
-        } catch (error) {
-          // Improve error handling
-          if (axios.isAxiosError(error)) {
-            console.error('Registration error:', error.response?.data || error.message);
-          } else {
-            console.error('Unexpected error registering user:', error);
-          }
-        }
+      if (response.status === 201) { // Check if the response status indicates success
+        await router.push('/login');
+        console.log(response);
+      } else {
+        console.error('Unexpected response:', response);
       }
-    };
+    } catch (error) {
+      console.error('Error registering user:', error);
+    }
+  }
+};
 
     return {
       form,
