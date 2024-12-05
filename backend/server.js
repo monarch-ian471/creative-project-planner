@@ -12,13 +12,11 @@ const app = express();
 const userRoutes = require('./routes/users');
 const projectRoutes = require('./routes/projects');
 
-
-
 // Middleware
 app.use(express.json());
 
 // CORS Configuration
-const allowedOrigins = ['http://localhost:5173', 'https://your-frontend-domain.com']; // Replace with your frontend domain
+const allowedOrigins = ['http://localhost:5173', 'https://your-frontend-domain.com']; //
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -32,10 +30,8 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
   credentials: true, // If you need to support cookies or Authorization headers
 };
-
 // Use the CORS middleware
 app.use(cors(corsOptions)); // Enabling CORS for all routes
-
 // Auth0 configuration
 const checkJwt = expressJwt({
   secret: jwksRsa.expressJwtSecret({
@@ -48,14 +44,11 @@ const checkJwt = expressJwt({
   issuer: `https://${process.env.AUTH0_DOMAIN}/`,
   algorithms: ['RS256']
 });
-
-
 // Load environment variables
 dotenv.config();
 
 // Connect to Database
 connectDB();
-
 
 // User Registration Route
 app.post('/api/users/register', async (req, res) => {
@@ -249,7 +242,6 @@ function generateRandomPassword() {
 function generateProviderId() {
   return crypto.randomBytes(16).toString('hex');
 }
-
 
 app.use('/api/users', userRoutes);
 

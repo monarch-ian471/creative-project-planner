@@ -80,7 +80,6 @@ const syncSocialLoginUser = async (socialUser: any) => {
   }
 };
 
-
 export const getAuth0Client = (): Auth0Client | null => auth0Client;
 
 export const loginWithRedirect = async (): Promise<void> => {
