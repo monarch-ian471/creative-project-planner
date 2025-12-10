@@ -13,6 +13,24 @@ const app = express();
 const userRoutes = require('./routes/users');
 const projectRoutes = require('./routes/projects');
 
+// Load environment variables first
+dotenv.config();
+
+// Validate required environment variables
+const requiredEnvVars = [
+  'MONGODB_URI',
+  'JWT_SECRET',
+  'AUTH0_DOMAIN',
+  'AUTH0_AUDIENCE'
+];
+
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
+  console.error('Please create a .env file with all required variables');
+  process.exit(1);
+}
+
 // Middleware
 app.use(express.json());
 
@@ -45,8 +63,6 @@ const checkJwt = expressJwt({
   issuer: `https://${process.env.AUTH0_DOMAIN}/`,
   algorithms: ['RS256']
 });
-// Load environment variables
-dotenv.config();
 
 // Connect to Database
 connectDB();

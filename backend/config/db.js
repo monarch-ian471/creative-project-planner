@@ -5,10 +5,7 @@ const Project = require('../models/project');  // Import the Project model
 const connectDB = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URI);
 
     console.log('MongoDB connected...');
 

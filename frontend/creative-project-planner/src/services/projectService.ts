@@ -130,7 +130,7 @@ export const projectService = {
   async updateProject(projectId: string, projectData: Partial<Project>): Promise<Project> {
     try {
       const headers = await getAuthHeaders();
-      const response = await axios.patch(`${API_BASE_URL}/projects/${projectId}`, projectData, { headers });
+      const response = await axios.put(`${API_BASE_URL}/projects/${projectId}`, projectData, { headers });
       return response.data;
     } catch (error) {
       console.error(`Failed to update project ${projectId}`, error);
