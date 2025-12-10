@@ -1,8 +1,10 @@
 // routes/users.js
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const mongoose = require('mongoose');
 const multer = require('multer');
-const { User } = require('../models/user');  // Import the User model
+const User = require('../models/user');  // Import the User model
 const Project = require('../models/project');
 
 
@@ -98,18 +100,18 @@ router.get('/profile', async (req, res) => {
   });
   
   // Upload profile picture endpoint
-  router.post('/profile-picture', upload.single('profilePicture'), async (req, err, res, next) => {
+  router.post('/profile-picture', upload.single('profilePicture'), async (req, res) => {
     try {
       const userId = req.user.id;
       
-      if (err instanceof multer.MulterError) {
-        return res.status(400).json({ message: 'File upload error', error: err.message });
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
       }
   
       const user = await User.findById(userId);
   
       if (!user) {
-        return res.status(500).json({ message: 'Unexpected server error during file upload', error: err.message });
+        return res.status(404).json({ message: 'User not found' });
       }
   
       // Update user's profile picture path

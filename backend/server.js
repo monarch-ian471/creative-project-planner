@@ -1,13 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken'); // Direct import of jsonwebtoken
 const { expressjwt: expressJwt } = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const User = require('./models/user.js').User;
+const User = require('./models/user.js');
 const app = express();
 const userRoutes = require('./routes/users');
 const projectRoutes = require('./routes/projects');
@@ -83,10 +84,6 @@ app.post('/api/users/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10); // Consistent salt rounds
-      console.log('Raw Password:', password);
-      console.log('Hashed Password:', hashedPassword);
 
     // Create new user
     const newUser = new User({
@@ -190,7 +187,7 @@ app.post('/api/users/social-login', async (req, res) => {
           provider,
           providerId: generateProviderId()
         }],
-        password: (generateRandomPassword(), 10),
+        password: await bcrypt.hash(generateRandomPassword(), 10),
         isVerified: true // Social login users are typically verified
       });
 
@@ -264,59 +261,6 @@ app.use((err, req, res, next) => {
 const Project = require('./models/project.js'); // Import the Project model
 
 app.use('/api/projects', projectRoutes);
-// Create a new project
-app.post('/api/projects', checkJwt, async (req, res) => {
-  try {
-    const newProject = new Project(req.body);  // Create a new project from the request body
-    const savedProject = await newProject.save();  // Save project to database
-    res.json(savedProject);  // Respond with the saved project
-  } catch (err) {
-    res.status(500).json({ error: err.message });  // Handle errors
-  }
-});
-
-// Get all projects
-app.get('/api/projects', checkJwt, async (req, res) => {
-  try {
-    const projects = await Project.find();  // Fetch all projects from database
-    res.json(projects);  // Respond with projects list
-  } catch (err) {
-    res.status(500).json({ error: err.message });  // Handle errors
-  }
-});
-
-// Get a single project by ID
-app.get('/api/projects/:id',checkJwt,  async (req, res) => {
-  try {
-    const project = await Project.findById(req.params.id);  // Fetch project by ID
-    if (!project) return res.status(404).json({ message: 'Project not found' });  // Handle project not found
-    res.json(project);  // Respond with the project details
-  } catch (err) {
-    res.status(500).json({ error: err.message });  // Handle errors
-  }
-});
-
-// Delete a project by ID
-app.delete('/api/projects/:id', checkJwt, async (req, res) => {
-  try {
-    const deletedProject = await Project.findByIdAndDelete(req.params.id);  // Delete project by ID
-    if (!deletedProject) return res.status(404).json({ message: 'Project not found' });  // Handle project not found
-    res.json({ message: 'Project deleted' });  // Respond with success message
-  } catch (err) {
-    res.status(500).json({ error: err.message });  // Handle errors
-  }
-});
-
-// Update a project by ID
-app.put('/api/projects/:id', checkJwt, async (req, res) => {
-  try {
-    const updatedProject = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });  // Update project
-    if (!updatedProject) return res.status(404).json({ message: 'Project not found' });  // Handle project not found
-    res.json(updatedProject);  // Respond with updated project
-  } catch (err) {
-    res.status(500).json({ error: err.message });  // Handle errors
-  }
-});
 
 // Optional: Allow preflight requests (OPTIONS)
 app.options('*', cors(corsOptions)); // Handles CORS preflight
