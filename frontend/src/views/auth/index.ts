@@ -1,11 +1,11 @@
 const routes = [
     {
-      path: '/login',
+      path: 'login',
       name: 'UserAuth',
       component: () => import('@/views/auth/UserAuth.vue'),
     },
     {
-      path: '/admin-login',
+      path: 'admin-login',
       name: 'AdminAuth',
       component: () => import('@/views/auth/AdminAuth.vue'),
     },

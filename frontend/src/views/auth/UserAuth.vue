@@ -10,6 +10,7 @@ const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
 const isAuthenticated = computed(() => !!localStorage.getItem('token'));
+const hasToken = computed(() => !!localStorage.getItem('token'));
 
 // Login form
 const loginForm = ref({
@@ -112,12 +113,12 @@ const goBack = () => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
       <!-- Back Button (only show if authenticated) -->
       <button 
-        v-if="isAuthenticated"
+        v-if="hasToken"
         @click="goBack"
         class="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-      >
       >
         <ArrowLeft :size="20" />
         <span>Back to Home</span>
@@ -325,4 +326,5 @@ const goBack = () => {
         Protected by industry-standard encryption
       </p>
     </div>
+  </div>
 </template>
