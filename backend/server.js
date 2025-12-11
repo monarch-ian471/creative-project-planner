@@ -12,6 +12,10 @@ const User = require('./models/user.js');
 const app = express();
 const userRoutes = require('./routes/users');
 const projectRoutes = require('./routes/projects');
+const adminRoutes = require('./routes/admin');
+const communityRoutes = require('./routes/community');
+const updatesRoutes = require('./routes/updates');
+const statsRoutes = require('./routes/stats');
 
 // Load environment variables first
 dotenv.config();
@@ -257,6 +261,14 @@ function generateProviderId() {
 }
 
 app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/community', communityRoutes);
+app.use('/api/updates', updatesRoutes);
+app.use('/api/stats', statsRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Example protected route
 app.get('/api/protected', checkJwt, (req, res) => {
@@ -275,8 +287,6 @@ app.use((err, req, res, next) => {
 
 // Project Routes (CRUD)
 const Project = require('./models/project.js'); // Import the Project model
-
-app.use('/api/projects', projectRoutes);
 
 // Optional: Allow preflight requests (OPTIONS)
 app.options('*', cors(corsOptions)); // Handles CORS preflight

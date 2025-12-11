@@ -4,8 +4,131 @@ const router = express.Router();
 const path = require('path');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');  // Import the User model
-const Project = require('../models/project');
+const Project = require('../models/Project');
+
+// ============================================
+// USER AUTHENTICATION ENDPOINTS
+// ============================================
+
+// User registration
+router.post('/register', async (req, res) => {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+    
+    // Validate input
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+    
+    // TODO: Check if user already exists
+    // const existingUser = await User.findOne({ email });
+    // if (existingUser) {
+    //   return res.status(400).json({ message: 'Email already registered' });
+    // }
+    
+    // TODO: Hash password
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // TODO: Create user in database
+    // const newUser = new User({
+    //   firstName,
+    //   lastName,
+    //   email,
+    //   password: hashedPassword,
+    //   role: 'user',
+    //   status: 'active'
+    // });
+    // await newUser.save();
+    
+    // Create JWT token
+    const token = jwt.sign(
+      { id: 'temp-user-id', role: 'user' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+    
+    res.status(201).json({
+      message: 'Registration successful',
+      token,
+      user: {
+        id: 'temp-user-id',
+        firstName,
+        lastName,
+        email
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
+  }
+});
+
+// User login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    
+    // TODO: Find user in database
+    // const user = await User.findOne({ email });
+    // if (!user) {
+    //   return res.status(401).json({ message: 'Invalid credentials' });
+    // }
+    
+    // TODO: Verify password
+    // const isValidPassword = await bcrypt.compare(password, user.password);
+    // if (!isValidPassword) {
+    //   return res.status(401).json({ message: 'Invalid credentials' });
+    // }
+    
+    // For demo purposes - accepting any login
+    // Remove this in production!
+    const mockUser = {
+      _id: 'user123',
+      firstName: 'Demo',
+      lastName: 'User',
+      email: email,
+      role: 'user'
+    };
+    
+    // Create JWT token
+    const token = jwt.sign(
+      { id: mockUser._id, role: 'user' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+    
+    res.json({
+      message: 'Login successful',
+      token,
+      user: {
+        id: mockUser._id,
+        firstName: mockUser.firstName,
+        lastName: mockUser.lastName,
+        email: mockUser.email
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// ============================================
+// EXISTING USER PROFILE ENDPOINTS
+// ============================================
+
 
 
 const sanitizeFilename = require('sanitize-filename');

@@ -49,6 +49,35 @@ router.get('/:id', checkJwt, async (req, res) => {
   }
 });
 
+// Update project status
+router.put('/:id/status', checkJwt, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    // Check if user owns this project
+    if (project.userId.toString() !== req.auth.sub) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+    
+    project.status = status;
+    if (status === 'completed') {
+      project.completionDate = new Date();
+      project.progress = 100;
+    }
+    
+    await project.save();
+    res.json(project);
+  } catch (err) {
+    console.error('Error updating project status:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create a new project
 router.post('/', checkJwt, async (req, res) => {
   try {
