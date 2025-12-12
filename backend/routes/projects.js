@@ -1,66 +1,244 @@
+// routes/projects.js - Complete CRUD operations
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const Project = require('../models/Project');
-const { expressjwt: expressJwt } = require('express-jwt');
-const jwksRsa = require('jwks-rsa');
+const multer = require('multer');
+const path = require('path');
 
-// Auth0 configuration
-const checkJwt = expressJwt({
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
-  }),
-  audience: process.env.AUTH0_AUDIENCE,
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
-  algorithms: ['RS256']
-});
-
-// Get all projects (for authenticated user)
-router.get('/', checkJwt, async (req, res) => {
-  try {
-    const userId = req.auth.sub; // Auth0 user ID
-    const projects = await Project.find({ userId }).sort({ createdAt: -1 });
-    res.json(projects);
-  } catch (err) {
-    console.error('Error fetching projects:', err);
-    res.status(500).json({ error: err.message });
+// Multer configuration for project media
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads/projects'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `project-${uniqueSuffix}-${file.originalname}`);
   }
 });
 
-// Get a single project by ID
-router.get('/:id', checkJwt, async (req, res) => {
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'));
+    }
+  }
+});
+
+// JWT authentication middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.status(401).json({ message: 'Access token required' });
+
+  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+    if (err) return res.status(403).json({ message: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+};
+
+// ===== PROJECT CRUD =====
+
+// Get all projects (with optional filters)
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const { status, category, search, page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const query = { userId: req.user.id };
+    
+    if (status) query.status = status;
+    if (category) query.category = category;
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const projects = await Project.find(query)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+    
+    const total = await Project.countDocuments(query);
+    
+    res.json({
+      projects,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get projects error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get project by ID
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
+    
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    // Check if user owns this project
-    if (project.userId.toString() !== req.auth.sub) {
+    // Check ownership
+    if (project.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
     }
     
     res.json(project);
-  } catch (err) {
-    console.error('Error fetching project:', err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('Get project error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Update project status
-router.put('/:id/status', checkJwt, async (req, res) => {
+// Create project
+router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { status } = req.body;
+    const {
+      title,
+      description,
+      category,
+      startDate,
+      endDate,
+      budget,
+      status,
+      priority,
+      tags,
+      phases,
+      teamMembers,
+      milestones,
+      resources
+    } = req.body;
+    
+    if (!title || !description) {
+      return res.status(400).json({ message: 'Title and description required' });
+    }
+    
+    const newProject = new Project({
+      userId: req.user.id,
+      title,
+      description,
+      category,
+      startDate,
+      endDate,
+      budget,
+      status: status || 'planning',
+      priority: priority || 'medium',
+      tags: tags || [],
+      phases: phases || [],
+      teamMembers: teamMembers || [],
+      milestones: milestones || [],
+      resources: resources || []
+    });
+    
+    await newProject.save();
+    
+    res.status(201).json({
+      message: 'Project created successfully',
+      project: newProject
+    });
+  } catch (error) {
+    console.error('Create project error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update project
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
     const project = await Project.findById(req.params.id);
     
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    // Check if user owns this project
-    if (project.userId.toString() !== req.auth.sub) {
+    // Check ownership
+    if (project.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+    
+    const {
+      title,
+      description,
+      category,
+      startDate,
+      endDate,
+      budget,
+      status,
+      priority,
+      progress,
+      tags,
+      phases,
+      teamMembers,
+      milestones,
+      resources
+    } = req.body;
+    
+    // Update fields
+    if (title) project.title = title;
+    if (description) project.description = description;
+    if (category) project.category = category;
+    if (startDate) project.startDate = startDate;
+    if (endDate) project.endDate = endDate;
+    if (budget) project.budget = budget;
+    if (status) {
+      project.status = status;
+      if (status === 'completed') {
+        project.completionDate = new Date();
+        project.progress = 100;
+      }
+    }
+    if (priority) project.priority = priority;
+    if (progress !== undefined) project.progress = progress;
+    if (tags) project.tags = tags;
+    if (phases) project.phases = phases;
+    if (teamMembers) project.teamMembers = teamMembers;
+    if (milestones) project.milestones = milestones;
+    if (resources) project.resources = resources;
+    
+    await project.save();
+    
+    res.json({
+      message: 'Project updated successfully',
+      project
+    });
+  } catch (error) {
+    console.error('Update project error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update project status
+router.patch('/:id/status', authenticateToken, async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!['planning', 'in-progress', 'on-hold', 'completed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+    
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    if (project.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
     }
     
@@ -71,59 +249,57 @@ router.put('/:id/status', checkJwt, async (req, res) => {
     }
     
     await project.save();
-    res.json(project);
-  } catch (err) {
-    console.error('Error updating project status:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Create a new project
-router.post('/', checkJwt, async (req, res) => {
-  try {
-    const projectData = {
-      ...req.body,
-      userId: req.auth.sub // Set userId from authenticated user
-    };
     
-    const newProject = new Project(projectData);
-    const savedProject = await newProject.save();
-    res.status(201).json(savedProject);
-  } catch (err) {
-    console.error('Error creating project:', err);
-    res.status(500).json({ error: err.message });
+    res.json({
+      message: 'Status updated successfully',
+      project
+    });
+  } catch (error) {
+    console.error('Update status error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Update a project by ID
-router.put('/:id', checkJwt, async (req, res) => {
+// Update project progress
+router.patch('/:id/progress', authenticateToken, async (req, res) => {
   try {
+    const { progress } = req.body;
+    
+    if (progress < 0 || progress > 100) {
+      return res.status(400).json({ message: 'Progress must be 0-100' });
+    }
+    
     const project = await Project.findById(req.params.id);
     
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    // Check if user owns this project
-    if (project.userId.toString() !== req.auth.sub) {
+    if (project.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
     }
     
-    const updatedProject = await Project.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
-      { new: true, runValidators: true }
-    );
+    project.progress = progress;
     
-    res.json(updatedProject);
-  } catch (err) {
-    console.error('Error updating project:', err);
-    res.status(500).json({ error: err.message });
+    if (progress === 100 && project.status !== 'completed') {
+      project.status = 'completed';
+      project.completionDate = new Date();
+    }
+    
+    await project.save();
+    
+    res.json({
+      message: 'Progress updated successfully',
+      project
+    });
+  } catch (error) {
+    console.error('Update progress error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Delete a project by ID
-router.delete('/:id', checkJwt, async (req, res) => {
+// Upload project media
+router.post('/:id/media', authenticateToken, upload.array('media', 10), async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     
@@ -131,60 +307,86 @@ router.delete('/:id', checkJwt, async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    // Check if user owns this project
-    if (project.userId.toString() !== req.auth.sub) {
+    if (project.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+    
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No files uploaded' });
+    }
+    
+    const mediaUrls = req.files.map(file => `/uploads/projects/${file.filename}`);
+    project.media = [...(project.media || []), ...mediaUrls];
+    
+    await project.save();
+    
+    res.json({
+      message: 'Media uploaded successfully',
+      mediaUrls
+    });
+  } catch (error) {
+    console.error('Upload media error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete project
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    if (project.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
     }
     
     await Project.findByIdAndDelete(req.params.id);
+    
     res.json({ message: 'Project deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting project:', err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('Delete project error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Add a task to a project
-router.post('/:id/tasks', checkJwt, async (req, res) => {
+// Get project statistics
+router.get('/stats/summary', authenticateToken, async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const userId = req.user.id;
     
-    if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
+    const [total, planning, inProgress, onHold, completed, cancelled] = await Promise.all([
+      Project.countDocuments({ userId }),
+      Project.countDocuments({ userId, status: 'planning' }),
+      Project.countDocuments({ userId, status: 'in-progress' }),
+      Project.countDocuments({ userId, status: 'on-hold' }),
+      Project.countDocuments({ userId, status: 'completed' }),
+      Project.countDocuments({ userId, status: 'cancelled' })
+    ]);
     
-    // Check if user owns this project
-    if (project.userId.toString() !== req.auth.sub) {
-      return res.status(403).json({ message: 'Unauthorized access' });
-    }
+    const projects = await Project.find({ userId });
+    const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
+    const averageProgress = projects.length > 0 
+      ? projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length 
+      : 0;
     
-    await project.addTask(req.body);
-    res.status(201).json(project);
-  } catch (err) {
-    console.error('Error adding task:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Mark a task as completed
-router.patch('/:projectId/tasks/:taskId/complete', checkJwt, async (req, res) => {
-  try {
-    const project = await Project.findById(req.params.projectId);
-    
-    if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
-    
-    // Check if user owns this project
-    if (project.userId.toString() !== req.auth.sub) {
-      return res.status(403).json({ message: 'Unauthorized access' });
-    }
-    
-    await project.completeTask(req.params.taskId);
-    res.json(project);
-  } catch (err) {
-    console.error('Error completing task:', err);
-    res.status(500).json({ error: err.message });
+    res.json({
+      total,
+      byStatus: {
+        planning,
+        inProgress,
+        onHold,
+        completed,
+        cancelled
+      },
+      totalBudget,
+      averageProgress: Math.round(averageProgress)
+    });
+  } catch (error) {
+    console.error('Get stats error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

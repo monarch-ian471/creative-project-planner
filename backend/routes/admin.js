@@ -1,21 +1,12 @@
+// routes/admin.js - Complete admin management operations
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname))
-  }
-});
-
-const upload = multer({ storage: storage });
+const User = require('../models/user');
+const Project = require('../models/Project');
+const Product = require('../models/Product');
+const Settings = require('../models/Settings');
 
 // Admin authentication middleware
 const authenticateAdmin = (req, res, next) => {
@@ -28,53 +19,44 @@ const authenticateAdmin = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     
-    if (decoded.role !== 'admin') {
+    // Check if user is admin (you can add isAdmin field to User model)
+    if (!decoded.isAdmin) {
       return res.status(403).json({ message: 'Admin access required' });
     }
     
-    req.adminId = decoded.id;
+    req.user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
   }
 };
 
+// ===== ADMIN AUTHENTICATION =====
+
 // Admin login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // TODO: Replace with actual database query
-    // For now, using a hardcoded admin for demonstration
-    const hardcodedAdmin = {
-      _id: 'admin123',
-      email: 'admin@creativeprojects.com',
-      password: '$2a$10$your-hashed-password', // Replace with actual hashed password
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin'
-    };
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password required' });
+    }
     
-    // Find admin user in database
-    // const admin = await User.findOne({ email, role: 'admin' });
+    // Find user with admin privileges
+    const user = await User.findOne({ email, isAdmin: true });
     
-    if (email !== hardcodedAdmin.email) {
+    if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
-    // In production, use bcrypt.compare
-    // const isValidPassword = await bcrypt.compare(password, admin.password);
-    
-    // For demo purposes, accepting any password
-    // Remove this in production!
-    const isValidPassword = true;
+    const isValidPassword = await bcrypt.compare(password, user.password);
     
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
     const token = jwt.sign(
-      { id: hardcodedAdmin._id, role: 'admin' },
+      { id: user._id, email: user.email, isAdmin: true },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
@@ -82,10 +64,10 @@ router.post('/login', async (req, res) => {
     res.json({
       token,
       admin: {
-        id: hardcodedAdmin._id,
-        email: hardcodedAdmin.email,
-        firstName: hardcodedAdmin.firstName,
-        lastName: hardcodedAdmin.lastName
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
       }
     });
   } catch (error) {
@@ -94,404 +76,487 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ===== DASHBOARD STATISTICS =====
+
 // Get platform statistics
 router.get('/stats', authenticateAdmin, async (req, res) => {
   try {
-    // TODO: Implement actual database queries
-    const stats = {
-      totalUsers: 1250,
-      totalProjects: 3420,
-      totalSales: 850,
-      revenue: 125000,
-      activeCreators: 380,
-      pendingOrders: 45
-    };
+    const [
+      totalUsers,
+      totalProjects,
+      totalProducts,
+      pendingProducts,
+      approvedProducts,
+      rejectedProducts
+    ] = await Promise.all([
+      User.countDocuments(),
+      Project.countDocuments(),
+      Product.countDocuments(),
+      Product.countDocuments({ status: 'pending' }),
+      Product.countDocuments({ status: 'approved' }),
+      Product.countDocuments({ status: 'rejected' })
+    ]);
     
-    res.json(stats);
+    // User growth (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const newUsers = await User.countDocuments({ 
+      createdAt: { $gte: thirtyDaysAgo } 
+    });
+    
+    // Revenue calculation
+    const products = await Product.find({ status: 'approved' });
+    const totalRevenue = products.reduce((sum, p) => sum + (p.price * p.sales), 0);
+    
+    // Get settings for commission
+    let settings = await Settings.findOne();
+    const commissionRate = settings ? settings.commissionRate : 10;
+    const platformRevenue = totalRevenue * (commissionRate / 100);
+    
+    res.json({
+      users: {
+        total: totalUsers,
+        new: newUsers
+      },
+      projects: {
+        total: totalProjects
+      },
+      products: {
+        total: totalProducts,
+        pending: pendingProducts,
+        approved: approvedProducts,
+        rejected: rejectedProducts
+      },
+      revenue: {
+        total: totalRevenue,
+        platform: platformRevenue,
+        commissionRate
+      }
+    });
   } catch (error) {
-    console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Failed to fetch statistics' });
+    console.error('Get stats error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get all updates
-router.get('/updates', async (req, res) => {
+// Get recent activity
+router.get('/activity', authenticateAdmin, async (req, res) => {
   try {
-    // TODO: Implement database query
-    const updates = [];
-    res.json(updates);
+    const limit = parseInt(req.query.limit) || 20;
+    
+    const [recentUsers, recentProjects, recentProducts] = await Promise.all([
+      User.find().select('-password').sort({ createdAt: -1 }).limit(5),
+      Project.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'firstName lastName email'),
+      Product.find().sort({ createdAt: -1 }).limit(5).populate('sellerId', 'firstName lastName email')
+    ]);
+    
+    res.json({
+      recentUsers,
+      recentProjects,
+      recentProducts
+    });
   } catch (error) {
-    console.error('Error fetching updates:', error);
-    res.status(500).json({ error: 'Failed to fetch updates' });
+    console.error('Get activity error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Create new update
-router.post('/updates', async (req, res) => {
-  try {
-    const { title, description, mediaUrl, mediaType, published } = req.body;
-    
-    // TODO: Save to database
-    const newUpdate = {
-      title,
-      description,
-      mediaUrl,
-      mediaType,
-      published,
-      createdAt: new Date()
-    };
-    
-    res.json(newUpdate);
-  } catch (error) {
-    console.error('Error creating update:', error);
-    res.status(500).json({ error: 'Failed to create update' });
-  }
-});
-
-// Update existing update
-router.put('/updates/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-    
-    // TODO: Update in database
-    res.json({ success: true, id, ...updateData });
-  } catch (error) {
-    console.error('Error updating update:', error);
-    res.status(500).json({ error: 'Failed to update' });
-  }
-});
-
-// Delete update
-router.delete('/updates/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // TODO: Delete from database
-    res.json({ success: true, id });
-  } catch (error) {
-    console.error('Error deleting update:', error);
-    res.status(500).json({ error: 'Failed to delete update' });
-  }
-});
-
-// Upload media file
-router.post('/upload', upload.single('media'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-    
-    const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ url: fileUrl });
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).json({ error: 'Failed to upload file' });
-  }
-});
-
-// Helper functions (to be implemented with actual database queries)
-async function getUserCount() {
-  // TODO: Query database for user count
-  return 150;
-}
-
-async function getProjectCount() {
-  // TODO: Query database for project count
-  return 342;
-}
-
-async function getSalesCount() {
-  // TODO: Query database for sales count
-  return 89;
-}
-
-async function calculateRevenue() {
-  // TODO: Calculate total revenue from sales
-  // Formula: (Total Sales * Platform Fee) - Operating Costs
-  const totalSales = 1500000; // MWK
-  const platformFee = 0.03; // 3%
-  const operatingCosts = 50000; // Domain, database, admin costs
-  
-  return (totalSales * platformFee) - operatingCosts;
-}
-
-async function getActiveCreatorsCount() {
-  // TODO: Query database for active creators
-  return 120;
-}
-
-async function getPendingOrdersCount() {
-  // TODO: Query database for pending orders
-  return 12;
-}
-
-// ============================================
-// USER MANAGEMENT ENDPOINTS
-// ============================================
+// ===== USER MANAGEMENT =====
 
 // Get all users
 router.get('/users', authenticateAdmin, async (req, res) => {
   try {
-    // TODO: Replace with actual database query
-    // const users = await User.find().select('-password');
+    const { search, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    const mockUsers = [
-      {
-        _id: 'user1',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        phone: '+1 (555) 123-4567',
-        role: 'user',
-        status: 'active',
-        createdAt: new Date('2024-01-15'),
-        projectCount: 5,
-        purchaseCount: 3
-      },
-      {
-        _id: 'user2',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane@example.com',
-        role: 'user',
-        status: 'active',
-        createdAt: new Date('2024-02-20'),
-        projectCount: 8,
-        purchaseCount: 12
+    const query = {};
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const users = await User.find(query)
+      .select('-password')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+    
+    const total = await User.countDocuments(query);
+    
+    res.json({
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
       }
-    ];
-    
-    res.json(mockUsers);
+    });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Failed to fetch users' });
+    console.error('Get users error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Create new user
-router.post('/users', authenticateAdmin, async (req, res) => {
+// Get user by ID
+router.get('/users/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, role, status } = req.body;
+    const user = await User.findById(req.params.id).select('-password');
     
-    // TODO: Check if user exists
-    // const existingUser = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     
-    // TODO: Hash password and save to database
-    // const hashedPassword = await bcrypt.hash(tempPassword, 10);
-    // const newUser = new User({ firstName, lastName, email, phone, role, status, password: hashedPassword });
-    // await newUser.save();
+    // Get user's projects and products
+    const [projects, products] = await Promise.all([
+      Project.find({ userId: user._id }),
+      Product.find({ sellerId: user._id })
+    ]);
     
-    res.status(201).json({
-      message: 'User created successfully',
-      user: { firstName, lastName, email, role, status }
+    res.json({
+      user,
+      projects,
+      products
     });
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Failed to create user' });
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Update user
 router.put('/users/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
+    const { firstName, lastName, email, isAdmin, accountStatus } = req.body;
     
-    // TODO: Update in database
-    // const user = await User.findByIdAndUpdate(id, updateData, { new: true }).select('-password');
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (isAdmin !== undefined) user.isAdmin = isAdmin;
+    if (accountStatus) user.accountStatus = accountStatus;
+    
+    await user.save();
+    
+    const updated = user.toObject();
+    delete updated.password;
     
     res.json({
       message: 'User updated successfully',
-      user: { _id: id, ...updateData }
+      user: updated
     });
   } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Failed to update user' });
+    console.error('Update user error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Delete user
 router.delete('/users/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const user = await User.findById(req.params.id);
     
-    // TODO: Delete from database
-    // await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Delete user's projects and products
+    await Promise.all([
+      Project.deleteMany({ userId: user._id }),
+      Product.deleteMany({ sellerId: user._id })
+    ]);
+    
+    await User.findByIdAndDelete(req.params.id);
     
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Failed to delete user' });
+    console.error('Delete user error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ============================================
-// PRODUCT MANAGEMENT ENDPOINTS
-// ============================================
+// ===== PRODUCT MANAGEMENT =====
 
 // Get all products
 router.get('/products', authenticateAdmin, async (req, res) => {
   try {
-    // TODO: Replace with actual database query
-    // const products = await Product.find().populate('sellerId');
+    const { status, search, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    const mockProducts = [
-      {
-        _id: 'prod1',
-        name: 'Premium Design Template',
-        description: 'Professional design template for creative projects',
-        price: 49.99,
-        category: 'Templates',
-        images: ['https://via.placeholder.com/400'],
-        sellerId: {
-          _id: 'user1',
-          firstName: 'John',
-          lastName: 'Doe'
-        },
-        status: 'pending',
-        featured: false,
-        sales: 0,
-        views: 45,
-        rating: 0,
-        createdAt: new Date('2024-03-10')
-      },
-      {
-        _id: 'prod2',
-        name: 'UI Kit Bundle',
-        description: 'Complete UI kit with 100+ components',
-        price: 79.99,
-        category: 'UI Kits',
-        images: ['https://via.placeholder.com/400'],
-        sellerId: {
-          _id: 'user2',
-          firstName: 'Jane',
-          lastName: 'Smith'
-        },
-        status: 'approved',
-        featured: true,
-        sales: 25,
-        views: 320,
-        rating: 4.8,
-        createdAt: new Date('2024-02-15')
+    const query = {};
+    if (status) query.status = status;
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const products = await Product.find(query)
+      .populate('sellerId', 'firstName lastName email')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+    
+    const total = await Product.countDocuments(query);
+    
+    res.json({
+      products,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
       }
-    ];
-    
-    res.json(mockProducts);
+    });
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ message: 'Failed to fetch products' });
+    console.error('Get products error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Approve product
-router.put('/products/:id/approve', authenticateAdmin, async (req, res) => {
+router.patch('/products/:id/approve', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const product = await Product.findById(req.params.id);
     
-    // TODO: Update in database
-    // await Product.findByIdAndUpdate(id, { status: 'approved' });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     
-    res.json({ message: 'Product approved successfully' });
+    product.status = 'approved';
+    product.rejectionReason = undefined;
+    await product.save();
+    
+    res.json({
+      message: 'Product approved successfully',
+      product
+    });
   } catch (error) {
-    console.error('Error approving product:', error);
-    res.status(500).json({ message: 'Failed to approve product' });
+    console.error('Approve product error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Reject product
-router.put('/products/:id/reject', authenticateAdmin, async (req, res) => {
+router.patch('/products/:id/reject', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
     const { reason } = req.body;
     
-    // TODO: Update in database and notify seller
-    // await Product.findByIdAndUpdate(id, { status: 'rejected', rejectionReason: reason });
+    if (!reason) {
+      return res.status(400).json({ message: 'Rejection reason required' });
+    }
     
-    res.json({ message: 'Product rejected successfully' });
+    const product = await Product.findById(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    product.status = 'rejected';
+    product.rejectionReason = reason;
+    await product.save();
+    
+    res.json({
+      message: 'Product rejected',
+      product
+    });
   } catch (error) {
-    console.error('Error rejecting product:', error);
-    res.status(500).json({ message: 'Failed to reject product' });
+    console.error('Reject product error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Toggle featured status
-router.put('/products/:id/featured', authenticateAdmin, async (req, res) => {
+router.patch('/products/:id/featured', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { featured } = req.body;
+    const product = await Product.findById(req.params.id);
     
-    // TODO: Update in database
-    // await Product.findByIdAndUpdate(id, { featured });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     
-    res.json({ message: 'Featured status updated successfully' });
+    if (product.status !== 'approved') {
+      return res.status(400).json({ message: 'Only approved products can be featured' });
+    }
+    
+    product.featured = !product.featured;
+    await product.save();
+    
+    res.json({
+      message: `Product ${product.featured ? 'featured' : 'unfeatured'}`,
+      product
+    });
   } catch (error) {
-    console.error('Error updating featured status:', error);
-    res.status(500).json({ message: 'Failed to update featured status' });
+    console.error('Toggle featured error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Delete product
 router.delete('/products/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const product = await Product.findByIdAndDelete(req.params.id);
     
-    // TODO: Delete from database
-    // await Product.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ message: 'Failed to delete product' });
+    console.error('Delete product error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ============================================
-// SETTINGS ENDPOINTS
-// ============================================
+// ===== SETTINGS MANAGEMENT =====
 
-// Get platform settings
+// Get settings
 router.get('/settings', authenticateAdmin, async (req, res) => {
   try {
-    // TODO: Fetch from database
-    // const settings = await Settings.findOne();
+    let settings = await Settings.findOne();
     
-    const mockSettings = {
-      siteName: 'Creative Project Planner',
-      siteUrl: 'https://creativeprojects.com',
-      contactEmail: 'contact@creativeprojects.com',
-      supportEmail: 'support@creativeprojects.com',
-      commissionRate: 10,
-      maintenanceMode: false,
-      allowNewRegistrations: true,
-      requireEmailVerification: true,
-      maxUploadSize: 50,
-      featuredProductsLimit: 10,
-      enableNotifications: true,
-      enableCommunityReviews: true,
-      currency: 'USD',
-      timezone: 'America/New_York'
-    };
+    if (!settings) {
+      // Create default settings if none exist
+      settings = new Settings({
+        siteName: 'Creative Project Planner',
+        siteUrl: 'https://creativeprojects.com',
+        contactEmail: 'contact@creativeprojects.com',
+        supportEmail: 'support@creativeprojects.com',
+        commissionRate: 10,
+        maintenanceMode: false,
+        allowNewRegistrations: true,
+        enableEmailNotifications: true,
+        enableProjectUpdates: true,
+        enableCommunityMessages: true,
+        maxUploadSize: 10,
+        allowedFileTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'],
+        currency: 'USD',
+        timezone: 'UTC'
+      });
+      await settings.save();
+    }
     
-    res.json(mockSettings);
+    res.json(settings);
   } catch (error) {
-    console.error('Error fetching settings:', error);
-    res.status(500).json({ message: 'Failed to fetch settings' });
+    console.error('Get settings error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Update platform settings
+// Update settings
 router.put('/settings', authenticateAdmin, async (req, res) => {
   try {
-    const settingsData = req.body;
+    const {
+      siteName,
+      siteUrl,
+      contactEmail,
+      supportEmail,
+      commissionRate,
+      maintenanceMode,
+      allowNewRegistrations,
+      enableEmailNotifications,
+      enableProjectUpdates,
+      enableCommunityMessages,
+      maxUploadSize,
+      allowedFileTypes,
+      currency,
+      timezone
+    } = req.body;
     
-    // TODO: Update in database
-    // await Settings.findOneAndUpdate({}, settingsData, { upsert: true });
+    let settings = await Settings.findOne();
     
-    res.json({ message: 'Settings updated successfully', settings: settingsData });
+    if (!settings) {
+      settings = new Settings();
+    }
+    
+    if (siteName) settings.siteName = siteName;
+    if (siteUrl) settings.siteUrl = siteUrl;
+    if (contactEmail) settings.contactEmail = contactEmail;
+    if (supportEmail) settings.supportEmail = supportEmail;
+    if (commissionRate !== undefined) {
+      if (commissionRate < 0 || commissionRate > 100) {
+        return res.status(400).json({ message: 'Commission rate must be 0-100' });
+      }
+      settings.commissionRate = commissionRate;
+    }
+    if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
+    if (allowNewRegistrations !== undefined) settings.allowNewRegistrations = allowNewRegistrations;
+    if (enableEmailNotifications !== undefined) settings.enableEmailNotifications = enableEmailNotifications;
+    if (enableProjectUpdates !== undefined) settings.enableProjectUpdates = enableProjectUpdates;
+    if (enableCommunityMessages !== undefined) settings.enableCommunityMessages = enableCommunityMessages;
+    if (maxUploadSize) settings.maxUploadSize = maxUploadSize;
+    if (allowedFileTypes) settings.allowedFileTypes = allowedFileTypes;
+    if (currency) settings.currency = currency;
+    if (timezone) settings.timezone = timezone;
+    
+    await settings.save();
+    
+    res.json({
+      message: 'Settings updated successfully',
+      settings
+    });
   } catch (error) {
-    console.error('Error updating settings:', error);
-    res.status(500).json({ message: 'Failed to update settings' });
+    console.error('Update settings error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ===== PROJECT MANAGEMENT =====
+
+// Get all projects
+router.get('/projects', authenticateAdmin, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const query = {};
+    if (status) query.status = status;
+    
+    const projects = await Project.find(query)
+      .populate('userId', 'firstName lastName email')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+    
+    const total = await Project.countDocuments(query);
+    
+    res.json({
+      projects,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get projects error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete project
+router.delete('/projects/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const project = await Project.findByIdAndDelete(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    res.json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Delete project error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

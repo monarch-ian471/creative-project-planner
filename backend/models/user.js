@@ -29,6 +29,49 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '/uploads/profile-pictures/default-avatar.png'
   },
+  phone: {
+    type: String,
+    default: ''
+  },
+  twitter: {
+    type: String,
+    default: ''
+  },
+  linkedin: {
+    type: String,
+    default: ''
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  accountStatus: {
+    type: String,
+    enum: ['active', 'suspended', 'banned'],
+    default: 'active'
+  },
+  notificationSettings: {
+    emailNotifications: {
+      type: Boolean,
+      default: true
+    },
+    projectUpdates: {
+      type: Boolean,
+      default: true
+    },
+    communityMessages: {
+      type: Boolean,
+      default: true
+    },
+    marketingEmails: {
+      type: Boolean,
+      default: false
+    }
+  },
   socialLogins: [{
     provider: {
       type: String,
