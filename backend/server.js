@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
+const { connectRedis, closeRedis } = require('./config/redis');
 const User = require('./models/user.js');
 const app = express();
 const userRoutes = require('./routes/users');
@@ -41,22 +42,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
-  }),
-  audience: process.env.AUTH0_AUDIENCE,
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
-  algorithms: ['RS256']
-});
 
-// Connect to Database
-connectDB();
-
-// User Registration Route
-app.post('/api/users/register', async (req, res) => {
-  const { 
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
@@ -71,13 +57,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/community', communityRoutes);
-
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -100,15 +79,26 @@ app.use((req, res) => {
 });
 
 // Connect to database and start server
-connectDB().then(() => {
+Promise.all([connectDB(), connectRedis()]).then(() => {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
     console.log(`✅ Database connected`);
     console.log(`✅ All API endpoints ready`);
   });
+
+  // Graceful shutdown
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(async () => {
+      await closeRedis();
+      await mongoose.connection.close();
+      console.log('HTTP server closed');
+      process.exit(0);
+    });
+  });
 }).catch(err => {
-  console.error('❌ Failed to connect to database:', err);
+  console.error('❌ Failed to start server:', err);
   process.exit(1);
 });
 

@@ -5,6 +5,14 @@ const jwt = require('jsonwebtoken');
 const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
+const { 
+  getCache, 
+  setCache, 
+  CACHE_TTL, 
+  cacheKeys, 
+  invalidateProductCache,
+  cacheMiddleware 
+} = require('../middleware/cache');
 
 // Multer configuration for product images
 const storage = multer.diskStorage({
@@ -46,7 +54,7 @@ const authenticateToken = (req, res, next) => {
 
 // ===== PUBLIC ROUTES =====
 
-// Get all approved products (public)
+// Get all approved products (public) - with caching
 router.get('/products', async (req, res) => {
   try {
     const { 
@@ -59,6 +67,15 @@ router.get('/products', async (req, res) => {
       page = 1, 
       limit = 12 
     } = req.query;
+    
+    // Create cache key from query params
+    const cacheKey = cacheKeys.products({ category, search, minPrice, maxPrice, featured, sort, page, limit });
+    
+    // Try to get from cache
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
     
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const query = { status: 'approved' };
@@ -85,7 +102,7 @@ router.get('/products', async (req, res) => {
     
     const total = await Product.countDocuments(query);
     
-    res.json({
+    const result = {
       products,
       pagination: {
         page: parseInt(page),
@@ -93,16 +110,29 @@ router.get('/products', async (req, res) => {
         total,
         pages: Math.ceil(total / parseInt(limit))
       }
-    });
+    };
+    
+    // Cache the result for 5 minutes
+    await setCache(cacheKey, result, CACHE_TTL.SHORT);
+    
+    res.json(result);
   } catch (error) {
     console.error('Get products error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get single product (public)
+// Get single product (public) - with caching
 router.get('/products/:id', async (req, res) => {
   try {
+    const cacheKey = cacheKeys.product(req.params.id);
+    
+    // Try to get from cache
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+    
     const product = await Product.findById(req.params.id)
       .populate('sellerId', 'firstName lastName email profilePicture');
     
@@ -117,6 +147,9 @@ router.get('/products/:id', async (req, res) => {
     // Increment views
     product.views += 1;
     await product.save();
+    
+    // Cache the updated product
+    await setCache(cacheKey, product, CACHE_TTL.SHORT);
     
     res.json(product);
   } catch (error) {
@@ -182,6 +215,9 @@ router.post('/products', authenticateToken, async (req, res) => {
     
     await newProduct.save();
     
+    // Invalidate related caches
+    await invalidateProductCache(newProduct._id, req.user.id);
+    
     res.status(201).json({
       message: 'Product created successfully (pending approval)',
       product: newProduct
@@ -225,6 +261,9 @@ router.put('/products/:id', authenticateToken, async (req, res) => {
     }
     
     await product.save();
+    
+    // Invalidate related caches
+    await invalidateProductCache(req.params.id, req.user.id);
     
     res.json({
       message: 'Product updated successfully',
@@ -282,6 +321,9 @@ router.delete('/products/:id', authenticateToken, async (req, res) => {
     }
     
     await Product.findByIdAndDelete(req.params.id);
+    
+    // Invalidate related caches
+    await invalidateProductCache(req.params.id, req.user.id);
     
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
@@ -352,10 +394,22 @@ router.post('/products/:id/rate', authenticateToken, async (req, res) => {
   }
 });
 
-// Get product categories
+// Get product categories - with caching
 router.get('/categories', async (req, res) => {
   try {
+    const cacheKey = cacheKeys.categories();
+    
+    // Try to get from cache
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+    
     const categories = await Product.distinct('category', { status: 'approved' });
+    
+    // Cache for 1 hour
+    await setCache(cacheKey, categories, CACHE_TTL.LONG);
+    
     res.json(categories);
   } catch (error) {
     console.error('Get categories error:', error);
@@ -363,10 +417,17 @@ router.get('/categories', async (req, res) => {
   }
 });
 
-// Get featured products
+// Get featured products - with caching
 router.get('/featured', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 6;
+    const cacheKey = cacheKeys.featured();
+    
+    // Try to get from cache
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
     
     const products = await Product.find({ 
       status: 'approved', 
@@ -375,6 +436,9 @@ router.get('/featured', async (req, res) => {
       .populate('sellerId', 'firstName lastName')
       .limit(limit)
       .sort('-createdAt');
+    
+    // Cache for 30 minutes
+    await setCache(cacheKey, products, CACHE_TTL.MEDIUM);
     
     res.json(products);
   } catch (error) {

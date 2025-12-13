@@ -7,6 +7,14 @@ const User = require('../models/user');
 const Project = require('../models/Project');
 const Product = require('../models/Product');
 const Settings = require('../models/Settings');
+const { 
+  getCache, 
+  setCache, 
+  CACHE_TTL, 
+  cacheKeys, 
+  invalidateProductCache,
+  deleteCache
+} = require('../middleware/cache');
 
 // Admin authentication middleware
 const authenticateAdmin = (req, res, next) => {
@@ -78,9 +86,17 @@ router.post('/login', async (req, res) => {
 
 // ===== DASHBOARD STATISTICS =====
 
-// Get platform statistics
+// Get platform statistics - with caching
 router.get('/stats', authenticateAdmin, async (req, res) => {
   try {
+    const cacheKey = cacheKeys.stats();
+    
+    // Try to get from cache
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+    
     const [
       totalUsers,
       totalProjects,
@@ -113,7 +129,7 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
     const commissionRate = settings ? settings.commissionRate : 10;
     const platformRevenue = totalRevenue * (commissionRate / 100);
     
-    res.json({
+    const result = {
       users: {
         total: totalUsers,
         new: newUsers
@@ -132,7 +148,12 @@ router.get('/stats', authenticateAdmin, async (req, res) => {
         platform: platformRevenue,
         commissionRate
       }
-    });
+    };
+    
+    // Cache for 5 minutes
+    await setCache(cacheKey, result, CACHE_TTL.SHORT);
+    
+    res.json(result);
   } catch (error) {
     console.error('Get stats error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -336,6 +357,10 @@ router.patch('/products/:id/approve', authenticateAdmin, async (req, res) => {
     product.rejectionReason = undefined;
     await product.save();
     
+    // Invalidate related caches
+    await invalidateProductCache(req.params.id, product.sellerId);
+    await deleteCache(cacheKeys.stats());
+    
     res.json({
       message: 'Product approved successfully',
       product
@@ -365,6 +390,10 @@ router.patch('/products/:id/reject', authenticateAdmin, async (req, res) => {
     product.rejectionReason = reason;
     await product.save();
     
+    // Invalidate related caches
+    await invalidateProductCache(req.params.id, product.sellerId);
+    await deleteCache(cacheKeys.stats());
+    
     res.json({
       message: 'Product rejected',
       product
@@ -391,6 +420,9 @@ router.patch('/products/:id/featured', authenticateAdmin, async (req, res) => {
     product.featured = !product.featured;
     await product.save();
     
+    // Invalidate related caches
+    await invalidateProductCache(req.params.id, product.sellerId);
+    
     res.json({
       message: `Product ${product.featured ? 'featured' : 'unfeatured'}`,
       product
@@ -404,11 +436,18 @@ router.patch('/products/:id/featured', authenticateAdmin, async (req, res) => {
 // Delete product
 router.delete('/products/:id', authenticateAdmin, async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
     
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
+    
+    const sellerId = product.sellerId;
+    await Product.findByIdAndDelete(req.params.id);
+    
+    // Invalidate related caches
+    await invalidateProductCache(req.params.id, sellerId);
+    await deleteCache(cacheKeys.stats());
     
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
