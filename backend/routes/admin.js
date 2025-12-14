@@ -7,6 +7,7 @@ const User = require('../models/user');
 const Project = require('../models/Project');
 const Product = require('../models/Product');
 const Settings = require('../models/Settings');
+const { deleteFiles, deleteFile } = require('../utils/fileCleanup');
 const { 
   getCache, 
   setCache, 
@@ -289,6 +290,39 @@ router.delete('/users/:id', authenticateAdmin, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
+    // Get user's projects and products for file cleanup
+    const [projects, products] = await Promise.all([
+      Project.find({ userId: user._id }),
+      Product.find({ sellerId: user._id })
+    ]);
+    
+    // Collect all files to delete
+    const filesToDelete = [];
+    
+    // Add profile picture if not default
+    if (user.profilePicture && !user.profilePicture.includes('default-avatar')) {
+      filesToDelete.push(user.profilePicture);
+    }
+    
+    // Add project media files
+    projects.forEach(project => {
+      if (project.media && project.media.length > 0) {
+        filesToDelete.push(...project.media);
+      }
+    });
+    
+    // Add product images
+    products.forEach(product => {
+      if (product.images && product.images.length > 0) {
+        filesToDelete.push(...product.images);
+      }
+    });
+    
+    // Delete all files
+    if (filesToDelete.length > 0) {
+      await deleteFiles(filesToDelete);
+    }
+    
     // Delete user's projects and products
     await Promise.all([
       Project.deleteMany({ userId: user._id }),
@@ -440,6 +474,11 @@ router.delete('/products/:id', authenticateAdmin, async (req, res) => {
     
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    // Delete associated product images
+    if (product.images && product.images.length > 0) {
+      await deleteFiles(product.images);
     }
     
     const sellerId = product.sellerId;

@@ -13,6 +13,7 @@ const {
   invalidateProductCache,
   cacheMiddleware 
 } = require('../middleware/cache');
+const { deleteFiles } = require('../utils/fileCleanup');
 
 // Multer configuration for product images
 const storage = multer.diskStorage({
@@ -318,6 +319,11 @@ router.delete('/products/:id', authenticateToken, async (req, res) => {
     
     if (product.sellerId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
+    }
+    
+    // Delete associated product images
+    if (product.images && product.images.length > 0) {
+      await deleteFiles(product.images);
     }
     
     await Product.findByIdAndDelete(req.params.id);

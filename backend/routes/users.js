@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Project = require('../models/Project');
+const { deleteFiles, deleteFile } = require('../utils/fileCleanup');
 
 // Multer configuration
 const storage = multer.diskStorage({
@@ -261,6 +262,29 @@ router.delete('/account', authenticateToken, async (req, res) => {
     
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(401).json({ message: 'Incorrect password' });
+    
+    // Get user's projects for file cleanup
+    const projects = await Project.find({ userId: user._id });
+    
+    // Collect all files to delete
+    const filesToDelete = [];
+    
+    // Add profile picture if not default
+    if (user.profilePicture && !user.profilePicture.includes('default-avatar')) {
+      filesToDelete.push(user.profilePicture);
+    }
+    
+    // Add project media files
+    projects.forEach(project => {
+      if (project.media && project.media.length > 0) {
+        filesToDelete.push(...project.media);
+      }
+    });
+    
+    // Delete all files
+    if (filesToDelete.length > 0) {
+      await deleteFiles(filesToDelete);
+    }
     
     await Project.deleteMany({ userId: user._id });
     await User.findByIdAndDelete(user._id);

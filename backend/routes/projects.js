@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const Project = require('../models/Project');
 const multer = require('multer');
 const path = require('path');
+const { deleteFiles } = require('../utils/fileCleanup');
 
 // Multer configuration for project media
 const storage = multer.diskStorage({
@@ -341,6 +342,11 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     
     if (project.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
+    }
+    
+    // Delete associated media files
+    if (project.media && project.media.length > 0) {
+      await deleteFiles(project.media);
     }
     
     await Project.findByIdAndDelete(req.params.id);
