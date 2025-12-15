@@ -1,0 +1,48 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore environment files
+.env
+.env.*
+!.env.example
+!.env.docker
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore uploads (optionally keep structure)
+uploads/**
+!uploads/.gitkeep
+!uploads/profile-pictures/.gitkeep
+!uploads/projects/.gitkeep
+!uploads/products/.gitkeep
+
+# Ignore temp files
+*.tmp
+*.bak
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore build files
+dist/
+build/
+
+# Ignore test coverage
+coverage/
+.nyc_output/
+
+# Ignore PM2 files
+.pm2/
+pids/
+*.pid
+*.seed
+
+# Ignore Redis dump
+dump.rdb

@@ -6,6 +6,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const path = require('path');
+const helmet = require('helmet');
+const compression = require('compression');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 const connectDB = require('./config/db');
 const { connectRedis, closeRedis } = require('./config/redis');
 const User = require('./models/user.js');
@@ -14,13 +18,52 @@ const userRoutes = require('./routes/users');
 const projectRoutes = require('./routes/projects');
 const adminRoutes = require('./routes/admin');
 const communityRoutes = require('./routes/community');
+const { logger, requestLogger } = require('./utils/logger');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { apiLimiter } = require('./middleware/rateLimiter');
 
 // Load environment variables first
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  logger.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  process.exit(1);
+}
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Compression middleware
+app.use(compression());
+
+// Request logging
+app.use(requestLogger);
+
+// Rate limiting
+app.use('/api/', apiLimiter);
+
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Data sanitization against NoSQL injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -54,51 +97,55 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     message: 'Server is running',
-    timestamp: new Date().toISOString()
-  });
-});
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error'
-  });
-});
+// 404 handler - must be before error handler
+app.use(notFoundHandler);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+// Error handling middleware - must be last
+app.use(errorHandler);
 
 // Connect to database and start server
 Promise.all([connectDB(), connectRedis()]).then(() => {
   const PORT = process.env.PORT || 3000;
   const server = app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
-    console.log(`✅ Database connected`);
-    console.log(`✅ All API endpoints ready`);
+    logger.info(`Server running on http://localhost:${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info('Database connected');
+    logger.info('All API endpoints ready');
   });
 
   // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM signal received: closing HTTP server');
+  const shutdown = async (signal) => {
+    logger.info(`${signal} signal received: closing HTTP server`);
     server.close(async () => {
-      await closeRedis();
-      await mongoose.connection.close();
-      console.log('HTTP server closed');
-      process.exit(0);
+      try {
+        await closeRedis();
+        await mongoose.connection.close();
+        logger.info('HTTP server closed');
+        logger.info('Database connections closed');
+        process.exit(0);
+      } catch (err) {
+        logger.error('Error during shutdown', err);
+        process.exit(1);
+      }
     });
-  });
+
+    // Force close after 10 seconds
+    setTimeout(() => {
+      logger.error('Forcing server shutdown');
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
 }).catch(err => {
-  console.error('❌ Failed to start server:', err);
+  logger.error('Failed to start server', err);
   process.exit(1);
 });
 
