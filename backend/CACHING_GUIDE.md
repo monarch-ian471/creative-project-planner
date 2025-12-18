@@ -70,7 +70,7 @@ REDIS_ENABLED=true
 REDIS_URL=redis://localhost:6379
 
 # Or for remote Redis:
-# REDIS_URL=redis://username:password@host:port
+# REDIS_URL=redis://YOUR_USERNAME:YOUR_PASSWORD@host:port
 ```
 
 ### 4. Start Application

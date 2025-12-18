@@ -31,10 +31,10 @@ JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('he
 NODE_ENV=production
 
 # Configure MongoDB (use MongoDB Atlas for production)
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/creative-project-planner?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster.mongodb.net/creative-project-planner?retryWrites=true&w=majority
 
 # Configure Redis (use managed Redis service)
-REDIS_URL=redis://username:password@redis-host:6379
+REDIS_URL=redis://YOUR_USERNAME:YOUR_PASSWORD@redis-host:6379
 REDIS_ENABLED=true
 
 # Set production port

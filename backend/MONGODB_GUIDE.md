@@ -25,7 +25,7 @@
 3. Click **Connect**
 
 **For Local MongoDB (with authentication):**
-1. Connection string: `mongodb://username:password@localhost:27017`
+1. Connection string: `mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017`
 2. Or use the Advanced Connection Options:
    - **Hostname**: `localhost`
    - **Port**: `27017`
@@ -391,10 +391,10 @@ Create a `.env` file in the backend root:
 MONGODB_URI=mongodb://localhost:27017/creative-project-planner
 
 # Or with authentication
-MONGODB_URI=mongodb://creative_app:YourPassword@localhost:27017/creative-project-planner
+MONGODB_URI=mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017/creative-project-planner
 
 # Or MongoDB Atlas
-MONGODB_URI=mongodb+srv://creative_app:YourPassword@cluster0.xxxxx.mongodb.net/creative-project-planner?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/creative-project-planner?retryWrites=true&w=majority
 
 # JWT Secret (generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
 JWT_SECRET=your_secure_random_string_here
@@ -616,13 +616,13 @@ For full database backups, use command-line tools:
 mongodump --db=creative-project-planner --out=/path/to/backup/
 
 # Backup with authentication
-mongodump --uri="mongodb://creative_app:password@localhost:27017/creative-project-planner" --out=/path/to/backup/
+mongodump --uri="mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017/creative-project-planner" --out=/path/to/backup/
 
 # Backup specific collection
 mongodump --db=creative-project-planner --collection=users --out=/path/to/backup/
 
 # For MongoDB Atlas
-mongodump --uri="mongodb+srv://creative_app:password@cluster.mongodb.net/creative-project-planner" --out=/path/to/backup/
+mongodump --uri="mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster.mongodb.net/creative-project-planner" --out=/path/to/backup/
 **In Compass:**
 1. Click **Connect** with your connection string
 2. If connection fails, check:
@@ -815,7 +815,7 @@ db.projects.find({ $text: { $search: "design website" } })
 mongodump --db=creative-project-planner --out=/path/to/backup/
 
 # Backup with authentication
-mongodump --uri="mongodb://creative_app:password@localhost:27017/creative-project-planner" --out=/path/to/backup/
+mongodump --uri="mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017/creative-project-planner" --out=/path/to/backup/
 
 # Backup specific collection
 mongodump --db=creative-project-planner --collection=users --out=/path/to/backup/
@@ -828,7 +828,7 @@ mongodump --db=creative-project-planner --collection=users --out=/path/to/backup
 mongorestore --db=creative-project-planner /path/to/backup/creative-project-planner/
 
 # Restore with authentication
-mongorestore --uri="mongodb://creative_app:password@localhost:27017/creative-project-planner" /path/to/backup/creative-project-planner/
+mongorestore --uri="mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017/creative-project-planner" /path/to/backup/creative-project-planner/
 
 # Restore specific collection
 mongorestore --db=creative-project-planner --collection=users /path/to/backup/creative-project-planner/users.bson
