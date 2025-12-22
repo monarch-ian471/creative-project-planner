@@ -391,10 +391,10 @@ Create a `.env` file in the backend root:
 MONGODB_URI=mongodb://localhost:27017/creative-project-planner
 
 # Or with authentication
-MONGODB_URI=mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017/creative-project-planner
+MONGODB_URI=mongodb://localhost:27017/creative-project-planner
 
 # Or MongoDB Atlas
-MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/creative-project-planner?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<cluster>.mongodb.net/creative-project-planner?retryWrites=true&w=majority
 
 # JWT Secret (generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
 JWT_SECRET=your_secure_random_string_here
@@ -622,7 +622,7 @@ mongodump --uri="mongodb://YOUR_USERNAME:YOUR_PASSWORD@localhost:27017/creative-
 mongodump --db=creative-project-planner --collection=users --out=/path/to/backup/
 
 # For MongoDB Atlas
-mongodump --uri="mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster.mongodb.net/creative-project-planner" --out=/path/to/backup/
+mongodump --uri="mongodb+srv://<cluster>.mongodb.net/creative-project-planner" --out=/path/to/backup/
 **In Compass:**
 1. Click **Connect** with your connection string
 2. If connection fails, check:
